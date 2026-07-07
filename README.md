@@ -68,12 +68,26 @@ Create a `.env` file in the root directory. You can copy the example template:
 ```bash
 cp .env.example .env
 ```
-Add your configurations, including the Gemini API key for chatbot functionalities:
+
+Define the required variables inside your `.env` file:
 ```env
-# .env
-PORT=3000
-GEMINI_API_KEY=your_google_gemini_api_key_here
+# GEMINI_API_KEY: Required for Gemini AI API calls.
+# Local: Replace with your Google AI Studio API key.
+# AI Studio Cloud: Automatically injected from your Secrets panel at runtime.
+GEMINI_API_KEY="MY_GEMINI_API_KEY"
+
+# APP_URL: The URL where the application is hosted.
+# Local: http://localhost:3000
+# AI Studio Cloud: Automatically injected as the active deployment URL.
+APP_URL="MY_APP_URL"
 ```
+
+#### 🛡️ AI Studio vs. Local Environment Variable Behavior
+
+*   **When Running on Google AI Studio / Cloud Run**: 
+    The platform automatically manages and securely injects `GEMINI_API_KEY` (using values securely configured in the AI Studio **Secrets** panel) and `APP_URL` (which points to the active preview/development URL). No manual configuration of the `.env` file is required in AI Studio's cloud editor.
+*   **When Running Locally**:
+    You **must** create the `.env` file manually at the root of your project using the keys described above. Fill in your personal Google AI Studio API key for `GEMINI_API_KEY`, and set `APP_URL` to `http://localhost:3000` (or your custom local address).
 
 ### 3. Install Node.js Dependencies
 Install the required packages for the orchestrating server and frontend:
@@ -118,6 +132,46 @@ Start the high-performance compiled server:
 npm run start
 ```
 The application will listen on port `3000`, routing both frontend requests and internal python microservice proxy connections.
+
+---
+
+## ⚡ Vercel Deployment & Environment Setup
+
+If you want to deploy this application to **Vercel**, you must configure your environment variables in the Vercel Dashboard and understand how Vercel's serverless runtime interacts with a dual Node.js/Python architecture.
+
+### 1. Configuring Environment Variables in Vercel
+
+Do **NOT** commit your physical `.env` file to your Git repository (it is secured and ignored via `.gitignore`). Instead, configure these values directly in the **Vercel Web Dashboard**:
+
+1. Navigate to your project inside the [Vercel Dashboard](https://vercel.com).
+2. Go to **Settings** > **Environment Variables**.
+3. Add the following key-value pairs:
+
+| Variable Name | Value / Format | Purpose |
+| :--- | :--- | :--- |
+| `GEMINI_API_KEY` | `AIzaSy...` (Your Gemini API Key) | Authorizes smart chatbot guides and AI passenger assistants. |
+| `APP_URL` | `https://your-app-name.vercel.app` | Informs the app of its active deployment domain. |
+| `PORT` | `3000` | Defines the ingress port. |
+
+---
+
+### 2. ⚠️ Important Architectural Note for Vercel
+
+Vercel is built primarily for **Static Web Hosting** and ephemeral **Serverless Functions**. 
+
+Because this application utilizes a dual-process architecture (where the Node.js Express server dynamically spawns and maintains a Python Flask subprocess via `child_process.spawn`), **Vercel's standard serverless environment cannot run this persistent Python background process natively.**
+
+To deploy this system successfully, choose one of the following production setups:
+
+#### Option A: Containerized Hosting (Highly Recommended)
+Deploy the full-stack bundle as a unified **Docker Container** on platforms that support persistent processes (such as **Google Cloud Run**, **Render**, or **Heroku**). 
+* *Note: Google AI Studio automatically configures and deploys this app directly to Google Cloud Run by default, ensuring that all API proxies and internal processes work seamlessly.*
+
+#### Option B: Decoupled Deployments (Frontend on Vercel)
+If you specifically want to utilize Vercel for hosting the frontend user interface:
+1. **Host Frontend on Vercel**: Deploy only the frontend static SPA client. Set the Vercel build command to `npm run build` and point the output directory to `dist`.
+2. **Host Backend on Container Platforms**: Host the Node.js Express + Python Flask microservice bundle as a persistent container on **Google Cloud Run** or **Render**.
+3. **Connect via API URL**: Define a custom environment variable in Vercel (e.g. `VITE_API_BASE_URL`) pointing to your hosted container endpoint to route API calls securely.
 
 ---
 
