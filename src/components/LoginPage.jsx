@@ -68,13 +68,7 @@ export default function LoginPage({ onAuthSuccess, lightMode = true }) {
           };
         }
 
-        // Show a friendly info notice and log them in
-        alert(
-          "⚡ Local-First Offline Demo Mode Activated!\n\n" +
-          "Since Vercel's serverless environment does not natively support persistent Express + Python Flask background processes, we have seamlessly switched to Offline Demo Mode.\n\n" +
-          "You can now explore the entire application (including the Interactive 3D/SVG Indoor Map, pathfinder, train schedules, and live crowd simulations) offline!"
-        );
-
+        // Silent transition to Local-First Offline Demo Mode
         onAuthSuccess(mockUser, 'mock_token_offline_fallback');
       } else {
         setError(err.message || 'An error occurred during authentication');

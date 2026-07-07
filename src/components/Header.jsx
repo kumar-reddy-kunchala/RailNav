@@ -25,7 +25,8 @@ export default function Header({
   sidebarOpen,
   isCollapsed,
   setIsCollapsed,
-  setActiveTab
+  setActiveTab,
+  isOfflineMode
 }) {
   const lightMode = true; // Forced Light Mode Only
   const [currentTime, setCurrentTime] = useState('');
@@ -157,6 +158,11 @@ export default function Header({
               {activeStation && (
                 <span className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded-md border bg-blue-50 border-blue-100 text-blue-600">
                   {activeStation.code}
+                </span>
+              )}
+              {isOfflineMode && (
+                <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 border border-amber-500/20 animate-pulse tracking-wider">
+                  Offline Demo
                 </span>
               )}
             </div>
