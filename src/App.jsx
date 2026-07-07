@@ -53,6 +53,303 @@ import VoiceNavigator from './components/VoiceNavigator';
 import FacilityIcon from './components/FacilityIcon';
 import CameraQRScanner from './components/CameraQRScanner';
 
+// ==================== OFFLINE STATIC DATABASE & PATHFINDING FALLBACKS ====================
+const STATIC_DATABASE = {
+  stations: [
+    { id: "central", name: "Central Station", code: "CEN", distance: "0.4 km away", facilitiesCount: 8, activeRoutesCount: 8, crowdStatus: "Medium", zone: "Central Zone" },
+    { id: "secunderabad", name: "Secunderabad Jn", code: "SC", distance: "1.2 km away", facilitiesCount: 8, activeRoutesCount: 7, crowdStatus: "High", zone: "SCR" },
+    { id: "vijayawada", name: "Vijayawada Jn", code: "BZA", distance: "2.5 km away", facilitiesCount: 6, activeRoutesCount: 5, crowdStatus: "Medium", zone: "SCR" },
+    { id: "prayagraj", name: "Prayagraj Jn", code: "PRYJ", distance: "4.1 km away", facilitiesCount: 6, activeRoutesCount: 6, crowdStatus: "High", zone: "NCR" },
+    { id: "new_delhi", name: "New Delhi Station", code: "NDLS", distance: "5.0 km away", facilitiesCount: 7, activeRoutesCount: 9, crowdStatus: "High", zone: "NR" },
+    { id: "mumbai_csmt", name: "Mumbai CSMT", code: "CSMT", distance: "3.8 km away", facilitiesCount: 6, activeRoutesCount: 8, crowdStatus: "Medium", zone: "CR" },
+    { id: "chennai_central", name: "Chennai Central", code: "MAS", distance: "6.2 km away", facilitiesCount: 6, activeRoutesCount: 7, crowdStatus: "Low", zone: "SR" },
+    { id: "howrah", name: "Howrah Jn", code: "HWH", distance: "7.5 km away", facilitiesCount: 7, activeRoutesCount: 8, crowdStatus: "High", zone: "ER" }
+  ],
+  facilities: [
+    { id: "fac_restroom", stationId: "central", name: "Restroom Block A", type: "restroom", status: "2 Available", icon: "Restroom", nodeId: "node_restroom" },
+    { id: "fac_food", stationId: "central", name: "Main Food Court", type: "food_court", status: "Open", icon: "FoodCourt", nodeId: "node_food" },
+    { id: "fac_coffee", stationId: "central", name: "Coffee Store", type: "coffee_shop", status: "Open", icon: "CoffeeStore", nodeId: "node_coffee" },
+    { id: "fac_atm", stationId: "central", name: "ATM Counter", type: "atm", status: "3 Available", icon: "ATM", nodeId: "node_atm" },
+    { id: "fac_waiting", stationId: "central", name: "Waiting Area", type: "waiting_area", status: "Available", icon: "WaitingArea", nodeId: "node_waiting" },
+    { id: "fac_wheelchair", stationId: "central", name: "Wheelchair Accessible", type: "accessibility", status: "Available", icon: "WheelchairAccessible", nodeId: "node_elevator" },
+    { id: "fac_platform", stationId: "central", name: "Platform Information", type: "platform", status: "Platform Details", icon: "PlatformInformation", nodeId: "node_platform_info" },
+    { id: "fac_map", stationId: "central", name: "Station Map", type: "map", status: "Interactive Map", icon: "StationMap", nodeId: "node_entrance" },
+
+    { id: "fac_sc_restroom", stationId: "secunderabad", name: "Premium Toilet", type: "restroom", status: "3 Available", icon: "Restroom", nodeId: "sc_ticket" },
+    { id: "fac_sc_food", stationId: "secunderabad", name: "SCR Food Plaza", type: "food_court", status: "Open", icon: "FoodCourt", nodeId: "sc_food" },
+    { id: "fac_sc_lounge", stationId: "secunderabad", name: "AC Executive Lounge", type: "waiting_area", status: "Available", icon: "WaitingArea", nodeId: "sc_lounge" },
+    { id: "fac_sc_atm", stationId: "secunderabad", name: "SBI ATM", type: "atm", status: "2 Available", icon: "ATM", nodeId: "sc_entrance" },
+    { id: "fac_sc_wheelchair", stationId: "secunderabad", name: "Disabled Ramp", type: "accessibility", status: "Available", icon: "WheelchairAccessible", nodeId: "sc_elevator" },
+    { id: "fac_sc_platform", stationId: "secunderabad", name: "Digital Timetable Screen", type: "platform", status: "Live Status", icon: "PlatformInformation", nodeId: "sc_p1" },
+    { id: "fac_sc_water", stationId: "secunderabad", name: "RO Water Stall", type: "coffee_shop", status: "Open", icon: "CoffeeStore", nodeId: "sc_ticket" },
+    { id: "fac_sc_map", stationId: "secunderabad", name: "SC Station Map", type: "map", status: "3D Layout", icon: "StationMap", nodeId: "sc_entrance" },
+
+    { id: "fac_bza_restroom", stationId: "vijayawada", name: "Platform 1 Toilet", type: "restroom", status: "1 Available", icon: "Restroom", nodeId: "bza_entrance" },
+    { id: "fac_bza_food", stationId: "vijayawada", name: "BZA Canteen", type: "food_court", status: "Open", icon: "FoodCourt", nodeId: "bza_food" },
+    { id: "fac_bza_water", stationId: "vijayawada", name: "Pure Drink Water", type: "coffee_shop", status: "Available", icon: "CoffeeStore", nodeId: "bza_drinking_water" },
+    { id: "fac_bza_elevator", stationId: "vijayawada", name: "Platform Lift", type: "accessibility", status: "Available", icon: "WheelchairAccessible", nodeId: "bza_elevator" },
+    { id: "fac_bza_platform", stationId: "vijayawada", name: "Coach Indicator board", type: "platform", status: "Active", icon: "PlatformInformation", nodeId: "bza_p1" },
+    { id: "fac_bza_map", stationId: "vijayawada", name: "BZA Station Map", type: "map", status: "Digital Map", icon: "StationMap", nodeId: "bza_entrance" },
+
+    { id: "fac_pryj_restroom", stationId: "prayagraj", name: "PRYJ Restroom", type: "restroom", status: "4 Available", icon: "Restroom", nodeId: "pryj_booking" },
+    { id: "fac_pryj_food", stationId: "prayagraj", name: "IRCTC Canteen", type: "food_court", status: "Open", icon: "FoodCourt", nodeId: "pryj_civil_lines" },
+    { id: "fac_pryj_lounge", stationId: "prayagraj", name: "AC Waiting Hall", type: "waiting_area", status: "Available", icon: "WaitingArea", nodeId: "pryj_waiting" },
+    { id: "fac_pryj_bridge", stationId: "prayagraj", name: "Foot Over Bridge", type: "accessibility", status: "Safe Passage", icon: "WheelchairAccessible", nodeId: "pryj_overbridge" },
+    { id: "fac_pryj_platform", stationId: "prayagraj", name: "Platform Display Status", type: "platform", status: "Live", icon: "PlatformInformation", nodeId: "pryj_p1" },
+    { id: "fac_pryj_map", stationId: "prayagraj", name: "PRYJ Interactive Map", type: "map", status: "Interactive", icon: "StationMap", nodeId: "pryj_civil_lines" }
+  ],
+  nodes: [
+    { id: "node_entrance", stationId: "central", name: "Main Entrance", x: 73, y: 69, floor: 0 },
+    { id: "node_restroom", stationId: "central", name: "Restroom", x: 78, y: 56, floor: 0 },
+    { id: "node_food", stationId: "central", name: "Food Court", x: 78, y: 45, floor: 0 },
+    { id: "node_coffee", stationId: "central", name: "Coffee Store", x: 78, y: 32, floor: 0 },
+    { id: "node_waiting", stationId: "central", name: "Waiting Area", x: 67, y: 47, floor: 0 },
+    { id: "node_atm", stationId: "central", name: "ATM Counter", x: 55, y: 65, floor: 0 },
+    { id: "node_elevator", stationId: "central", name: "Elevator & Ramp", x: 55, y: 40, floor: 0 },
+    { id: "node_platform_info", stationId: "central", name: "Platform Info Screen", x: 55, y: 53, floor: 0 },
+    { id: "node_platform_junction", stationId: "central", name: "Platform Walkway Entrance", x: 70, y: 29, floor: 1 },
+    { id: "node_platform1", stationId: "central", name: "Platform 1", x: 25, y: 25, floor: 1 },
+    { id: "node_platform2", stationId: "central", name: "Platform 2", x: 45, y: 25, floor: 1 },
+    { id: "node_platform3", stationId: "central", name: "Platform 3", x: 65, y: 25, floor: 1 },
+    { id: "node_platform4", stationId: "central", name: "Platform 4", x: 70, y: 25, floor: 1 },
+
+    { id: "sc_entrance", stationId: "secunderabad", name: "Secunderabad Main Entrance", x: 50, y: 90, floor: 0 },
+    { id: "sc_ticket", stationId: "secunderabad", name: "Ticket Counter", x: 50, y: 70, floor: 0 },
+    { id: "sc_lounge", stationId: "secunderabad", name: "AC Executive Lounge", x: 25, y: 55, floor: 0 },
+    { id: "sc_food", stationId: "secunderabad", name: "SCR Food Plaza", x: 75, y: 55, floor: 0 },
+    { id: "sc_elevator", stationId: "secunderabad", name: "Lifts & Escalators", x: 50, y: 40, floor: 0 },
+    { id: "sc_p1", stationId: "secunderabad", name: "Platform 1", x: 20, y: 20, floor: 1 },
+    { id: "sc_p10", stationId: "secunderabad", name: "Platform 10", x: 80, y: 20, floor: 1 },
+
+    { id: "bza_entrance", stationId: "vijayawada", name: "BZA Main Gate", x: 50, y: 85, floor: 0 },
+    { id: "bza_food", stationId: "vijayawada", name: "BZA Canteen", x: 35, y: 65, floor: 0 },
+    { id: "bza_drinking_water", stationId: "vijayawada", name: "Water Vendor Station", x: 65, y: 65, floor: 0 },
+    { id: "bza_elevator", stationId: "vijayawada", name: "BZA Core Elevator", x: 50, y: 45, floor: 0 },
+    { id: "bza_p1", stationId: "vijayawada", name: "Platform 1", x: 20, y: 20, floor: 1 },
+    { id: "bza_p10", stationId: "vijayawada", name: "Platform 10", x: 80, y: 20, floor: 1 },
+
+    { id: "pryj_civil_lines", stationId: "prayagraj", name: "Civil Lines Gate", x: 50, y: 85, floor: 0 },
+    { id: "pryj_booking", stationId: "prayagraj", name: "PRYJ Ticket Center", x: 30, y: 65, floor: 0 },
+    { id: "pryj_waiting", stationId: "prayagraj", name: "AC Waiting Lounge", x: 70, y: 65, floor: 0 },
+    { id: "pryj_overbridge", stationId: "prayagraj", name: "Foot Over Bridge", x: 50, y: 45, floor: 1 },
+    { id: "pryj_p1", stationId: "prayagraj", name: "Platform 1", x: 25, y: 20, floor: 1 },
+    { id: "pryj_p10", stationId: "prayagraj", name: "Platform 10", x: 75, y: 20, floor: 1 }
+  ],
+  edges: [
+    { id: "e1", stationId: "central", fromNode: "node_entrance", toNode: "node_restroom", distance: 30 },
+    { id: "e2", stationId: "central", fromNode: "node_restroom", toNode: "node_food", distance: 25 },
+    { id: "e3", stationId: "central", fromNode: "node_food", toNode: "node_coffee", distance: 20 },
+    { id: "e4", stationId: "central", fromNode: "node_entrance", toNode: "node_atm", distance: 50 },
+    { id: "e5", stationId: "central", fromNode: "node_atm", toNode: "node_platform_info", distance: 40 },
+    { id: "e6", stationId: "central", fromNode: "node_platform_info", toNode: "node_elevator", distance: 35 },
+    { id: "e7", stationId: "central", fromNode: "node_elevator", toNode: "node_waiting", distance: 45 },
+    { id: "e8", stationId: "central", fromNode: "node_waiting", toNode: "node_platform_junction", distance: 60 },
+    { id: "e9", stationId: "central", fromNode: "node_coffee", toNode: "node_platform_junction", distance: 25 },
+    { id: "e10", stationId: "central", fromNode: "node_platform_junction", toNode: "node_platform4", distance: 10 },
+    { id: "e11", stationId: "central", fromNode: "node_platform_junction", toNode: "node_platform3", distance: 20 },
+    { id: "e12", stationId: "central", fromNode: "node_platform_junction", toNode: "node_platform2", distance: 80 },
+    { id: "e13", stationId: "central", fromNode: "node_platform_junction", toNode: "node_platform1", distance: 120 },
+    { id: "e14", stationId: "central", fromNode: "node_restroom", toNode: "node_waiting", distance: 40 },
+    { id: "e15", stationId: "central", fromNode: "node_entrance", toNode: "node_platform_info", distance: 60 },
+
+    { id: "es1", stationId: "secunderabad", fromNode: "sc_entrance", toNode: "sc_ticket", distance: 25 },
+    { id: "es2", stationId: "secunderabad", fromNode: "sc_ticket", toNode: "sc_lounge", distance: 35 },
+    { id: "es3", stationId: "secunderabad", fromNode: "sc_ticket", toNode: "sc_food", distance: 35 },
+    { id: "es4", stationId: "secunderabad", fromNode: "sc_ticket", toNode: "sc_elevator", distance: 40 },
+    { id: "es5", stationId: "secunderabad", fromNode: "sc_lounge", toNode: "sc_p1", distance: 45 },
+    { id: "es6", stationId: "secunderabad", fromNode: "sc_elevator", toNode: "sc_p1", distance: 30 },
+    { id: "es7", stationId: "secunderabad", fromNode: "sc_elevator", toNode: "sc_p10", distance: 40 },
+    { id: "es8", stationId: "secunderabad", fromNode: "sc_food", toNode: "sc_p10", distance: 45 },
+
+    { id: "eb1", stationId: "vijayawada", fromNode: "bza_entrance", toNode: "bza_food", distance: 35 },
+    { id: "eb2", stationId: "vijayawada", fromNode: "bza_entrance", toNode: "bza_drinking_water", distance: 35 },
+    { id: "eb3", stationId: "vijayawada", fromNode: "bza_food", toNode: "bza_elevator", distance: 35 },
+    { id: "eb4", stationId: "vijayawada", fromNode: "bza_drinking_water", toNode: "bza_elevator", distance: 35 },
+    { id: "eb5", stationId: "vijayawada", fromNode: "bza_elevator", toNode: "bza_p1", distance: 40 },
+    { id: "eb6", stationId: "vijayawada", fromNode: "bza_elevator", toNode: "bza_p10", distance: 45 }
+  ],
+  trains: [
+    { id: "t1", stationId: "central", trainNo: "12863", name: "Superfast Express", arrivalTime: "10:36 AM", platform: "2", status: "On Time", statusText: "On Time" },
+    { id: "t2", stationId: "central", trainNo: "12723", name: "Intercity Express", arrivalTime: "11:10 AM", platform: "4", status: "Delayed", statusText: "Delayed by 15m" },
+    { id: "t3", stationId: "central", trainNo: "12615", name: "Passenger Special", arrivalTime: "11:45 AM", platform: "3", status: "On Time", statusText: "On Time" },
+    
+    { id: "t_sc1", stationId: "secunderabad", trainNo: "12728", name: "Godavari Express", arrivalTime: "05:15 PM", platform: "1", status: "On Time", statusText: "On Time" },
+    { id: "t_sc2", stationId: "secunderabad", trainNo: "12759", name: "Charminar Express", arrivalTime: "06:40 PM", platform: "10", status: "Delayed", statusText: "Delayed by 10m" }
+  ],
+  crowd: [
+    { stationId: "central", platformNo: "Platform 1", density: "Low", percentage: 22 },
+    { stationId: "central", platformNo: "Platform 2", density: "Medium", percentage: 54 },
+    { stationId: "central", platformNo: "Platform 3", density: "High", percentage: 82 },
+    { stationId: "central", platformNo: "Platform 4", density: "Medium", percentage: 48 },
+
+    { stationId: "secunderabad", platformNo: "Platform 1", density: "High", percentage: 85 },
+    { stationId: "secunderabad", platformNo: "Platform 10", density: "Medium", percentage: 60 }
+  ],
+  feedback: [
+    { id: "feed_1", userName: "Aravind K.", rating: 5, comments: "Offline navigation route planner, platform indicator is exact!", category: "Wayfinding", timestamp: "2026-07-06T12:00:00Z" },
+    { id: "feed_2", userName: "Pooja S.", rating: 4, comments: "Wheelchair accessible option automatically routed me through the elevators.", category: "Accessibility", timestamp: "2026-07-06T14:30:00Z" }
+  ]
+};
+
+function findShortestPathJS(nodes, edges, startNodeId, endNodeId) {
+  const startNode = nodes.find(n => n.id === startNodeId);
+  const endNode = nodes.find(n => n.id === endNodeId);
+  
+  if (!startNode || !endNode) return null;
+  if (startNodeId === endNodeId) {
+    return {
+      path: [startNode],
+      totalDistance: 0,
+      estimatedTimeMins: 0,
+      stepsCount: 1,
+      steps: [{
+        instruction: `You are already at ${startNode.name}`,
+        distance: 0,
+        fromNode: startNodeId,
+        toNode: endNodeId
+      }]
+    };
+  }
+
+  // Dijkstra implementation
+  const adjacency = {};
+  nodes.forEach(n => { adjacency[n.id] = []; });
+  
+  edges.forEach(e => {
+    const fromObj = nodes.find(n => n.id === e.fromNode);
+    const toObj = nodes.find(n => n.id === e.toNode);
+    if (fromObj && toObj) {
+      adjacency[e.fromNode].push({ node: toObj, distance: e.distance });
+      adjacency[e.toNode].push({ node: fromObj, distance: e.distance });
+    }
+  });
+
+  const distances = {};
+  const previous = {};
+  const unvisited = new Set();
+  
+  nodes.forEach(n => {
+    distances[n.id] = Infinity;
+    previous[n.id] = null;
+    unvisited.add(n.id);
+  });
+  
+  distances[startNodeId] = 0;
+
+  while (unvisited.size > 0) {
+    let currentId = null;
+    let minDistance = Infinity;
+    
+    unvisited.forEach(nodeId => {
+      if (distances[nodeId] < minDistance) {
+        minDistance = distances[nodeId];
+        currentId = nodeId;
+      }
+    });
+
+    if (currentId === null || currentId === endNodeId) {
+      break;
+    }
+
+    unvisited.delete(currentId);
+
+    const neighbors = adjacency[currentId] || [];
+    for (const neighbor of neighbors) {
+      if (!unvisited.has(neighbor.node.id)) continue;
+      
+      const alt = distances[currentId] + neighbor.distance;
+      if (alt < distances[neighbor.node.id]) {
+        distances[neighbor.node.id] = alt;
+        previous[neighbor.node.id] = currentId;
+      }
+    }
+  }
+
+  if (distances[endNodeId] === Infinity) return null;
+
+  const pathNodeIds = [];
+  let curr = endNodeId;
+  while (curr !== null) {
+    pathNodeIds.unshift(curr);
+    curr = previous[curr];
+  }
+
+  const pathNodes = pathNodeIds.map(id => nodes.find(n => n.id === id));
+  
+  const steps = [];
+  steps.push({
+    instruction: `Start at ${startNode.name}`,
+    distance: 0,
+    fromNode: startNodeId,
+    toNode: startNodeId
+  });
+
+  for (let i = 0; i < pathNodes.length - 1; i++) {
+    const fromN = pathNodes[i];
+    const toN = pathNodes[i + 1];
+    
+    const edge = edges.find(e => 
+      (e.fromNode === fromN.id && e.toNode === toN.id) || 
+      (e.fromNode === toN.id && e.toNode === fromN.id)
+    );
+    const dist = edge ? edge.distance : 10;
+    
+    let turnInstruction = '';
+    if (i === 0) {
+      turnInstruction = `Go straight towards ${toN.name}`;
+    } else {
+      const prevN = pathNodes[i - 1];
+      const v1 = { x: fromN.x - prevN.x, y: fromN.y - prevN.y };
+      const v2 = { x: toN.x - fromN.x, y: toN.y - fromN.y };
+      
+      const len1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y) || 1;
+      const len2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y) || 1;
+      
+      const v1_norm = { x: v1.x / len1, y: v1.y / len1 };
+      const v2_norm = { x: v2.x / len2, y: v2.y / len2 };
+      
+      const cross = v1_norm.x * v2_norm.y - v1_norm.y * v2_norm.x;
+      const dot = v1_norm.x * v2_norm.x + v1_norm.y * v2_norm.y;
+      
+      if (dot > 0.9) {
+        turnInstruction = `Go straight towards ${toN.name}`;
+      } else if (cross > 0.1) {
+        turnInstruction = `Turn right towards ${toN.name}`;
+      } else if (cross < -0.1) {
+        turnInstruction = `Turn left towards ${toN.name}`;
+      } else {
+        turnInstruction = `Proceed towards ${toN.name}`;
+      }
+    }
+
+    steps.push({
+      instruction: turnInstruction,
+      distance: dist,
+      fromNode: fromN.id,
+      toNode: toN.id
+    });
+  }
+
+  const finalDest = pathNodes[pathNodes.length - 1];
+  steps.push({
+    instruction: `${finalDest.name} is on your right`,
+    distance: 0,
+    fromNode: finalDest.id,
+    toNode: finalDest.id
+  });
+
+  const totalDistance = distances[endNodeId];
+  const estimatedTime = Math.max(1, Math.round(totalDistance / 80));
+
+  return {
+    path: pathNodes,
+    totalDistance,
+    estimatedTimeMins: estimatedTime,
+    stepsCount: steps.length,
+    steps
+  };
+}
+
 const favNodeIdMap = {
   restroom: 'node_restroom',
   food_court: 'node_foodcourt',
@@ -284,51 +581,79 @@ export default function App() {
   const fetchStations = async () => {
     try {
       const response = await fetch('/api/stations');
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
       setStations(data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Using static stations database fallback');
+      setStations(STATIC_DATABASE.stations);
+    }
   };
 
   const fetchFacilities = async (stationId) => {
     try {
       const response = await fetch(`/api/facilities/${stationId}`);
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
       setFacilities(data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Using static facilities database fallback');
+      const filtered = STATIC_DATABASE.facilities.filter(f => f.stationId === stationId);
+      setFacilities(filtered.length ? filtered : STATIC_DATABASE.facilities.filter(f => f.stationId === 'central'));
+    }
   };
 
   const fetchNodes = async (stationId) => {
     try {
       const response = await fetch(`/api/navigation/nodes/${stationId}`);
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
       setNodes(data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Using static nodes database fallback');
+      const filtered = STATIC_DATABASE.nodes.filter(n => n.stationId === stationId);
+      setNodes(filtered.length ? filtered : STATIC_DATABASE.nodes.filter(n => n.stationId === 'central'));
+    }
   };
 
   const fetchLiveTrainStatus = async (stationId) => {
     try {
       const url = stationId ? `/api/trains?stationId=${stationId}` : '/api/trains';
       const response = await fetch(url);
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
       setTrains(data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Using static trains database fallback');
+      const filtered = STATIC_DATABASE.trains.filter(t => !stationId || t.stationId === stationId);
+      setTrains(filtered.length ? filtered : STATIC_DATABASE.trains);
+    }
   };
 
   const fetchLiveCrowdStatus = async (stationId) => {
     try {
       const url = stationId ? `/api/crowd?stationId=${stationId}` : '/api/crowd';
       const response = await fetch(url);
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
       setCrowds(data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Using static crowd database fallback');
+      const filtered = STATIC_DATABASE.crowd.filter(c => !stationId || c.stationId === stationId);
+      setCrowds(filtered.length ? filtered : STATIC_DATABASE.crowd);
+    }
   };
 
   const fetchCommunityFeedback = async () => {
     try {
       const response = await fetch('/api/feedback');
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
       setCommunityFeedback(data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Using static feedback database fallback');
+      setCommunityFeedback(STATIC_DATABASE.feedback);
+    }
   };
 
   const fetchTripsHistory = async () => {
@@ -337,9 +662,13 @@ export default function App() {
       const response = await fetch('/api/navigation/trips', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
       setTripsHistory(data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Using empty static trip history fallback');
+      setTripsHistory([]);
+    }
   };
 
   // Trigger loading trips when user opens history tab
@@ -366,7 +695,8 @@ export default function App() {
     try {
       const url = `/api/navigation/route?stationId=${selectedStationId}&fromNode=${finalFrom}&toNode=${finalTo}`;
       const response = await fetch(url);
-      const data = await response.json();
+      const text = await response.text();
+      let data = JSON.parse(text);
 
       if (response.ok) {
         setRouteResult(data);
@@ -391,10 +721,28 @@ export default function App() {
           }).catch(err => console.error("Error logging trip:", err));
         }
       } else {
-        alert(data.error || 'Could not calculate navigation route.');
+        throw new Error(data.error || 'Could not calculate navigation route.');
       }
     } catch (error) {
-      console.error('Routing error:', error);
+      console.warn('Routing API failed, calculating shortest route on client-side:', error);
+      // Run the client-side Dijkstra algorithm!
+      const currentNodes = nodes.length ? nodes : STATIC_DATABASE.nodes.filter(n => n.stationId === selectedStationId);
+      const currentEdges = STATIC_DATABASE.edges.filter(e => e.stationId === selectedStationId);
+      
+      const localResult = findShortestPathJS(
+        currentNodes.length ? currentNodes : STATIC_DATABASE.nodes.filter(n => n.stationId === 'central'),
+        currentEdges.length ? currentEdges : STATIC_DATABASE.edges.filter(e => e.stationId === 'central'),
+        finalFrom,
+        finalTo
+      );
+      
+      if (localResult) {
+        setRouteResult(localResult);
+        setCurrentStepIndex(0);
+        setActiveNavigation(false);
+      } else {
+        alert('Could not calculate navigation route even using client-side fallback.');
+      }
     } finally {
       setIsFindingRoute(false);
     }
