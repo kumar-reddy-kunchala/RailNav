@@ -1,0 +1,362 @@
+{
+  "users": [
+    {
+      "id": "admin_1",
+      "email": "admin@railway.gov",
+      "name": "Kumar Admin",
+      "role": "admin",
+      "passwordHash": "21a89b51c4101ea487528c784386ead9cbcb9c603e535b892b68c0474483250a442dade77e543f4ac4c3d1fe78f65516d908f14016e762c48c2db46a73309748",
+      "salt": "6f388e433536f6cb61c124ce476283c0",
+      "accessibilityMode": false,
+      "createdAt": "2026-06-24T04:15:36.414Z"
+    },
+    {
+      "id": "user_1",
+      "email": "passenger@gmail.com",
+      "name": "Kumar Passenger",
+      "role": "passenger",
+      "passwordHash": "c3d7d45803ded2ac8774e1446e2de793cfbd499d53517a849f5d39d42370938d2af6ad0b5163f0006ea7c0e67dd4e4296a9fcfd9afaecab651101185457522f9",
+      "salt": "f5afae1bc17475401e797b8014434b7c",
+      "accessibilityMode": false,
+      "createdAt": "2026-06-24T04:15:36.415Z"
+    }
+  ],
+  "trips": [],
+  "feedback": [],
+  "stations": [
+    {
+      "id": "central",
+      "name": "Central Station",
+      "code": "CEN",
+      "distance": "0.4 km away",
+      "facilitiesCount": 8,
+      "activeRoutesCount": 8,
+      "crowdStatus": "Medium",
+      "zone": "Central Zone"
+    },
+    {
+      "id": "secunderabad",
+      "name": "Secunderabad Jn",
+      "code": "SC",
+      "distance": "1.2 km away",
+      "facilitiesCount": 8,
+      "activeRoutesCount": 7,
+      "crowdStatus": "High",
+      "zone": "SCR"
+    },
+    {
+      "id": "vijayawada",
+      "name": "Vijayawada Jn",
+      "code": "BZA",
+      "distance": "2.5 km away",
+      "facilitiesCount": 6,
+      "activeRoutesCount": 5,
+      "crowdStatus": "Medium",
+      "zone": "SCR"
+    },
+    {
+      "id": "prayagraj",
+      "name": "Prayagraj Jn",
+      "code": "PRYJ",
+      "distance": "4.1 km away",
+      "facilitiesCount": 6,
+      "activeRoutesCount": 6,
+      "crowdStatus": "High",
+      "zone": "NCR"
+    },
+    {
+      "id": "new_delhi",
+      "name": "New Delhi Station",
+      "code": "NDLS",
+      "distance": "5.0 km away",
+      "facilitiesCount": 7,
+      "activeRoutesCount": 9,
+      "crowdStatus": "High",
+      "zone": "NR"
+    },
+    {
+      "id": "mumbai_csmt",
+      "name": "Mumbai CSMT",
+      "code": "CSMT",
+      "distance": "3.8 km away",
+      "facilitiesCount": 6,
+      "activeRoutesCount": 8,
+      "crowdStatus": "Medium",
+      "zone": "CR"
+    },
+    {
+      "id": "chennai_central",
+      "name": "Chennai Central",
+      "code": "MAS",
+      "distance": "6.2 km away",
+      "facilitiesCount": 6,
+      "activeRoutesCount": 7,
+      "crowdStatus": "Low",
+      "zone": "SR"
+    },
+    {
+      "id": "howrah",
+      "name": "Howrah Jn",
+      "code": "HWH",
+      "distance": "7.5 km away",
+      "facilitiesCount": 7,
+      "activeRoutesCount": 8,
+      "crowdStatus": "High",
+      "zone": "ER"
+    }
+  ],
+  "facilities": [
+    { "id": "fac_restroom", "stationId": "central", "name": "Restroom", "type": "restroom", "status": "2 Available", "icon": "Restroom", "nodeId": "node_restroom" },
+    { "id": "fac_food", "stationId": "central", "name": "Food Court", "type": "food_court", "status": "Open", "icon": "FoodCourt", "nodeId": "node_food" },
+    { "id": "fac_coffee", "stationId": "central", "name": "Coffee Store", "type": "coffee_shop", "status": "Open", "icon": "CoffeeStore", "nodeId": "node_coffee" },
+    { "id": "fac_atm", "stationId": "central", "name": "ATM", "type": "atm", "status": "3 Available", "icon": "ATM", "nodeId": "node_atm" },
+    { "id": "fac_waiting", "stationId": "central", "name": "Waiting Area", "type": "waiting_area", "status": "Available", "icon": "WaitingArea", "nodeId": "node_waiting" },
+    { "id": "fac_wheelchair", "stationId": "central", "name": "Wheelchair Accessible", "type": "accessibility", "status": "Available", "icon": "WheelchairAccessible", "nodeId": "node_elevator" },
+    { "id": "fac_platform", "stationId": "central", "name": "Platform Information", "type": "platform", "status": "Platform Details", "icon": "PlatformInformation", "nodeId": "node_platform_info" },
+    { "id": "fac_map", "stationId": "central", "name": "Station Map", "type": "map", "status": "Interactive Map", "icon": "StationMap", "nodeId": "node_entrance" },
+
+    { "id": "fac_sc_restroom", "stationId": "secunderabad", "name": "Premium Toilet", "type": "restroom", "status": "3 Available", "icon": "Restroom", "nodeId": "sc_ticket" },
+    { "id": "fac_sc_food", "stationId": "secunderabad", "name": "SCR Food Plaza", "type": "food_court", "status": "Open", "icon": "FoodCourt", "nodeId": "sc_food" },
+    { "id": "fac_sc_lounge", "stationId": "secunderabad", "name": "AC Executive Lounge", "type": "waiting_area", "status": "Available", "icon": "WaitingArea", "nodeId": "sc_lounge" },
+    { "id": "fac_sc_atm", "stationId": "secunderabad", "name": "SBI ATM", "type": "atm", "status": "2 Available", "icon": "ATM", "nodeId": "sc_entrance" },
+    { "id": "fac_sc_wheelchair", "stationId": "secunderabad", "name": "Disabled Ramp", "type": "accessibility", "status": "Available", "icon": "WheelchairAccessible", "nodeId": "sc_elevator" },
+    { "id": "fac_sc_platform", "stationId": "secunderabad", "name": "Digital Timetable Screen", "type": "platform", "status": "Live Status", "icon": "PlatformInformation", "nodeId": "sc_p1" },
+    { "id": "fac_sc_water", "stationId": "secunderabad", "name": "RO Water Stall", "type": "coffee_shop", "status": "Open", "icon": "CoffeeStore", "nodeId": "sc_ticket" },
+    { "id": "fac_sc_map", "stationId": "secunderabad", "name": "SC Station Map", "type": "map", "status": "3D Layout", "icon": "StationMap", "nodeId": "sc_entrance" },
+
+    { "id": "fac_bza_restroom", "stationId": "vijayawada", "name": "Platform 1 Toilet", "type": "restroom", "status": "1 Available", "icon": "Restroom", "nodeId": "bza_entrance" },
+    { "id": "fac_bza_food", "stationId": "vijayawada", "name": "BZA Canteen", "type": "food_court", "status": "Open", "icon": "FoodCourt", "nodeId": "bza_food" },
+    { "id": "fac_bza_water", "stationId": "vijayawada", "name": "Pure Drink Water", "type": "coffee_shop", "status": "Available", "icon": "CoffeeStore", "nodeId": "bza_drinking_water" },
+    { "id": "fac_bza_elevator", "stationId": "vijayawada", "name": "Platform Lift", "type": "accessibility", "status": "Available", "icon": "WheelchairAccessible", "nodeId": "bza_elevator" },
+    { "id": "fac_bza_platform", "stationId": "vijayawada", "name": "Coach Indicator board", "type": "platform", "status": "Active", "icon": "PlatformInformation", "nodeId": "bza_p1" },
+    { "id": "fac_bza_map", "stationId": "vijayawada", "name": "BZA Station Map", "type": "map", "status": "Digital Map", "icon": "StationMap", "nodeId": "bza_entrance" },
+
+    { "id": "fac_pryj_restroom", "stationId": "prayagraj", "name": "PRYJ Restroom", "type": "restroom", "status": "4 Available", "icon": "Restroom", "nodeId": "pryj_booking" },
+    { "id": "fac_pryj_food", "stationId": "prayagraj", "name": "IRCTC Canteen", "type": "food_court", "status": "Open", "icon": "FoodCourt", "nodeId": "pryj_civil_lines" },
+    { "id": "fac_pryj_lounge", "stationId": "prayagraj", "name": "AC Waiting Hall", "type": "waiting_area", "status": "Available", "icon": "WaitingArea", "nodeId": "pryj_waiting" },
+    { "id": "fac_pryj_bridge", "stationId": "prayagraj", "name": "Foot Over Bridge", "type": "accessibility", "status": "Safe Passage", "icon": "WheelchairAccessible", "nodeId": "pryj_overbridge" },
+    { "id": "fac_pryj_platform", "stationId": "prayagraj", "name": "Platform Display Status", "type": "platform", "status": "Live", "icon": "PlatformInformation", "nodeId": "pryj_p1" },
+    { "id": "fac_pryj_map", "stationId": "prayagraj", "name": "PRYJ Interactive Map", "type": "map", "status": "Interactive", "icon": "StationMap", "nodeId": "pryj_civil_lines" },
+
+    { "id": "fac_ndls_restroom", "stationId": "new_delhi", "name": "Executive Toilet", "type": "restroom", "status": "5 Available", "icon": "Restroom", "nodeId": "ndls_lounge" },
+    { "id": "fac_ndls_food", "stationId": "new_delhi", "name": "Haldirams Food Court", "type": "food_court", "status": "Open", "icon": "FoodCourt", "nodeId": "ndls_food_court" },
+    { "id": "fac_ndls_lounge", "stationId": "new_delhi", "name": "IRCTC Suite Lounge", "type": "waiting_area", "status": "Available", "icon": "WaitingArea", "nodeId": "ndls_lounge" },
+    { "id": "fac_ndls_ramp", "stationId": "new_delhi", "name": "Wheelchair Assist Ramp", "type": "accessibility", "status": "Available", "icon": "WheelchairAccessible", "nodeId": "ndls_ramp" },
+    { "id": "fac_ndls_platform", "stationId": "new_delhi", "name": "Overhead Plat Screens", "type": "platform", "status": "Active", "icon": "PlatformInformation", "nodeId": "ndls_p1" },
+    { "id": "fac_ndls_water", "stationId": "new_delhi", "name": "Water ATM Booth", "type": "coffee_shop", "status": "Open", "icon": "CoffeeStore", "nodeId": "ndls_food_court" },
+    { "id": "fac_ndls_map", "stationId": "new_delhi", "name": "NDLS Digital Guide", "type": "map", "status": "Ready", "icon": "StationMap", "nodeId": "ndls_entrance_paharganj" },
+
+    { "id": "fac_csmt_restroom", "stationId": "mumbai_csmt", "name": "Heritage Wing Restroom", "type": "restroom", "status": "2 Available", "icon": "Restroom", "nodeId": "csmt_booking" },
+    { "id": "fac_csmt_food", "stationId": "mumbai_csmt", "name": "Central Railway Canteen", "type": "food_court", "status": "Open", "icon": "FoodCourt", "nodeId": "csmt_heritage_gate" },
+    { "id": "fac_csmt_water", "stationId": "mumbai_csmt", "name": "RO Drinking Water", "type": "coffee_shop", "status": "Available", "icon": "CoffeeStore", "nodeId": "csmt_drinking_water" },
+    { "id": "fac_csmt_subway", "stationId": "mumbai_csmt", "name": "CSMT Pedestrian Subway", "type": "accessibility", "status": "Escalator OK", "icon": "WheelchairAccessible", "nodeId": "csmt_subway" },
+    { "id": "fac_csmt_platform", "stationId": "mumbai_csmt", "name": "Central Info Desk", "type": "platform", "status": "Open", "icon": "PlatformInformation", "nodeId": "csmt_p1" },
+    { "id": "fac_csmt_map", "stationId": "mumbai_csmt", "name": "CSMT Station Map", "type": "map", "status": "Station Map", "icon": "StationMap", "nodeId": "csmt_heritage_gate" },
+
+    { "id": "fac_mas_restroom", "stationId": "chennai_central", "name": "MAS Clean Toilet", "type": "restroom", "status": "3 Available", "icon": "Restroom", "nodeId": "mas_waiting" },
+    { "id": "fac_mas_food", "stationId": "chennai_central", "name": "Saravana Bhavan Express", "type": "food_court", "status": "Open", "icon": "FoodCourt", "nodeId": "mas_food" },
+    { "id": "fac_mas_lounge", "stationId": "chennai_central", "name": "Sleeper Class Waiting Hall", "type": "waiting_area", "status": "Available", "icon": "WaitingArea", "nodeId": "mas_waiting" },
+    { "id": "fac_mas_escalator", "stationId": "chennai_central", "name": "Platform Escalator", "type": "accessibility", "status": "Working", "icon": "WheelchairAccessible", "nodeId": "mas_escalator" },
+    { "id": "fac_mas_platform", "stationId": "chennai_central", "name": "Live Display Hub", "type": "platform", "status": "Active", "icon": "PlatformInformation", "nodeId": "mas_p1" },
+    { "id": "fac_mas_map", "stationId": "chennai_central", "name": "MAS Wayfinding Board", "type": "map", "status": "Wayfinding", "icon": "StationMap", "nodeId": "mas_entrance" },
+
+    { "id": "fac_hwh_restroom", "stationId": "howrah", "name": "Executive Waiting Restroom", "type": "restroom", "status": "3 Available", "icon": "Restroom", "nodeId": "hwh_restroom" },
+    { "id": "fac_hwh_food", "stationId": "howrah", "name": "Jan Ahaar Canteen", "type": "food_court", "status": "Open", "icon": "FoodCourt", "nodeId": "hwh_food" },
+    { "id": "fac_hwh_atm", "stationId": "howrah", "name": "SBI ATM counter", "type": "atm", "status": "3 Available", "icon": "ATM", "nodeId": "hwh_atm" },
+    { "id": "fac_hwh_water", "stationId": "howrah", "name": "Chilled RO Water Tap", "type": "coffee_shop", "status": "Available", "icon": "CoffeeStore", "nodeId": "hwh_booking" },
+    { "id": "fac_hwh_platform", "stationId": "howrah", "name": "HWH Platform Screen", "type": "platform", "status": "Working", "icon": "PlatformInformation", "nodeId": "hwh_p8" },
+    { "id": "fac_hwh_wheelchair", "stationId": "howrah", "name": "Howrah Wheelchair Service", "type": "accessibility", "status": "Staff On Call", "icon": "WheelchairAccessible", "nodeId": "hwh_entrance" },
+    { "id": "fac_hwh_map", "stationId": "howrah", "name": "HWH Station Map", "type": "map", "status": "Interactive", "icon": "StationMap", "nodeId": "hwh_entrance" }
+  ],
+  "nodes": [
+    { "id": "node_entrance", "stationId": "central", "name": "Main Entrance", "x": 73, "y": 69, "floor": 0 },
+    { "id": "node_restroom", "stationId": "central", "name": "Restroom", "x": 78, "y": 56, "floor": 0 },
+    { "id": "node_food", "stationId": "central", "name": "Food Court", "x": 78, "y": 45, "floor": 0 },
+    { "id": "node_coffee", "stationId": "central", "name": "Coffee Store", "x": 78, "y": 32, "floor": 0 },
+    { "id": "node_waiting", "stationId": "central", "name": "Waiting Area", "x": 67, "y": 47, "floor": 0 },
+    { "id": "node_atm", "stationId": "central", "name": "ATM Counter", "x": 55, "y": 65, "floor": 0 },
+    { "id": "node_elevator", "stationId": "central", "name": "Elevator & Ramp", "x": 55, "y": 40, "floor": 0 },
+    { "id": "node_platform_info", "stationId": "central", "name": "Platform Info Screen", "x": 55, "y": 53, "floor": 0 },
+    { "id": "node_platform_junction", "stationId": "central", "name": "Platform Walkway Entrance", "x": 70, "y": 29, "floor": 1 },
+    { "id": "node_platform1", "stationId": "central", "name": "Platform 1", "x": 25, "y": 25, "floor": 1 },
+    { "id": "node_platform2", "stationId": "central", "name": "Platform 2", "x": 45, "y": 25, "floor": 1 },
+    { "id": "node_platform3", "stationId": "central", "name": "Platform 3", "x": 65, "y": 25, "floor": 1 },
+    { "id": "node_platform4", "stationId": "central", "name": "Platform 4", "x": 70, "y": 25, "floor": 1 },
+
+    { "id": "sc_entrance", "stationId": "secunderabad", "name": "Secunderabad Main Entrance", "x": 50, "y": 90, "floor": 0 },
+    { "id": "sc_ticket", "stationId": "secunderabad", "name": "Ticket Counter", "x": 50, "y": 70, "floor": 0 },
+    { "id": "sc_lounge", "stationId": "secunderabad", "name": "AC Executive Lounge", "x": 25, "y": 55, "floor": 0 },
+    { "id": "sc_food", "stationId": "secunderabad", "name": "SCR Food Plaza", "x": 75, "y": 55, "floor": 0 },
+    { "id": "sc_elevator", "stationId": "secunderabad", "name": "Lifts & Escalators", "x": 50, "y": 40, "floor": 0 },
+    { "id": "sc_p1", "stationId": "secunderabad", "name": "Platform 1", "x": 20, "y": 20, "floor": 1 },
+    { "id": "sc_p10", "stationId": "secunderabad", "name": "Platform 10", "x": 80, "y": 20, "floor": 1 },
+
+    { "id": "bza_entrance", "stationId": "vijayawada", "name": "BZA Main Gate", "x": 50, "y": 85, "floor": 0 },
+    { "id": "bza_food", "stationId": "vijayawada", "name": "BZA Canteen", "x": 35, "y": 65, "floor": 0 },
+    { "id": "bza_drinking_water", "stationId": "vijayawada", "name": "Water Vendor Station", "x": 65, "y": 65, "floor": 0 },
+    { "id": "bza_elevator", "stationId": "vijayawada", "name": "BZA Core Elevator", "x": 50, "y": 45, "floor": 0 },
+    { "id": "bza_p1", "stationId": "vijayawada", "name": "Platform 1", "x": 20, "y": 20, "floor": 1 },
+    { "id": "bza_p10", "stationId": "vijayawada", "name": "Platform 10", "x": 80, "y": 20, "floor": 1 },
+
+    { "id": "pryj_civil_lines", "stationId": "prayagraj", "name": "Civil Lines Gate", "x": 50, "y": 85, "floor": 0 },
+    { "id": "pryj_booking", "stationId": "prayagraj", "name": "PRYJ Ticket Center", "x": 30, "y": 65, "floor": 0 },
+    { "id": "pryj_waiting", "stationId": "prayagraj", "name": "AC Waiting Lounge", "x": 70, "y": 65, "floor": 0 },
+    { "id": "pryj_overbridge", "stationId": "prayagraj", "name": "Foot Over Bridge", "x": 50, "y": 45, "floor": 1 },
+    { "id": "pryj_p1", "stationId": "prayagraj", "name": "Platform 1", "x": 25, "y": 20, "floor": 1 },
+    { "id": "pryj_p10", "stationId": "prayagraj", "name": "Platform 10", "x": 75, "y": 20, "floor": 1 },
+
+    { "id": "ndls_entrance_paharganj", "stationId": "new_delhi", "name": "Paharganj Gate Entry", "x": 30, "y": 90, "floor": 0 },
+    { "id": "ndls_entrance_ajmeri", "stationId": "new_delhi", "name": "Ajmeri Gate Entry", "x": 70, "y": 90, "floor": 0 },
+    { "id": "ndls_food_court", "stationId": "new_delhi", "name": "NDLS Food Plaza", "x": 50, "y": 75, "floor": 0 },
+    { "id": "ndls_lounge", "stationId": "new_delhi", "name": "Executive Lounge", "x": 30, "y": 55, "floor": 0 },
+    { "id": "ndls_ramp", "stationId": "new_delhi", "name": "Wheelchair Assist Ramp", "x": 50, "y": 45, "floor": 0 },
+    { "id": "ndls_p1", "stationId": "new_delhi", "name": "Platform 1", "x": 15, "y": 20, "floor": 1 },
+    { "id": "ndls_p16", "stationId": "new_delhi", "name": "Platform 16", "x": 85, "y": 20, "floor": 1 },
+
+    { "id": "csmt_heritage_gate", "stationId": "mumbai_csmt", "name": "CSMT Heritage Gate", "x": 50, "y": 90, "floor": 0 },
+    { "id": "csmt_booking", "stationId": "mumbai_csmt", "name": "CSMT Ticket Concourse", "x": 35, "y": 70, "floor": 0 },
+    { "id": "csmt_drinking_water", "stationId": "mumbai_csmt", "name": "Pure Water Point", "x": 65, "y": 70, "floor": 0 },
+    { "id": "csmt_subway", "stationId": "mumbai_csmt", "name": "Pedestrian Subway", "x": 50, "y": 50, "floor": 0 },
+    { "id": "csmt_p1", "stationId": "mumbai_csmt", "name": "Platform 1", "x": 25, "y": 25, "floor": 1 },
+    { "id": "csmt_p18", "stationId": "mumbai_csmt", "name": "Platform 18", "x": 75, "y": 25, "floor": 1 },
+
+    { "id": "mas_entrance", "stationId": "chennai_central", "name": "Chennai Central Gate", "x": 50, "y": 85, "floor": 0 },
+    { "id": "mas_waiting", "stationId": "chennai_central", "name": "Sleeper waiting Area", "x": 30, "y": 65, "floor": 0 },
+    { "id": "mas_food", "stationId": "chennai_central", "name": "Saravana Bhavan Canteen", "x": 70, "y": 65, "floor": 0 },
+    { "id": "mas_escalator", "stationId": "chennai_central", "name": "Core Escalator", "x": 50, "y": 45, "floor": 0 },
+    { "id": "mas_p1", "stationId": "chennai_central", "name": "Platform 1", "x": 20, "y": 20, "floor": 1 },
+    { "id": "mas_p12", "stationId": "chennai_central", "name": "Platform 12", "x": 80, "y": 20, "floor": 1 },
+
+    { "id": "hwh_entrance", "stationId": "howrah", "name": "Howrah VIP Gate", "x": 50, "y": 85, "floor": 0 },
+    { "id": "hwh_booking", "stationId": "howrah", "name": "HWH Booking Lobby", "x": 35, "y": 70, "floor": 0 },
+    { "id": "hwh_atm", "stationId": "howrah", "name": "HWH ATM Bank Hub", "x": 65, "y": 70, "floor": 0 },
+    { "id": "hwh_food", "stationId": "howrah", "name": "Jan Ahaar Food", "x": 65, "y": 50, "floor": 0 },
+    { "id": "hwh_restroom", "stationId": "howrah", "name": "HWH Restrooms", "x": 35, "y": 50, "floor": 0 },
+    { "id": "hwh_p8", "stationId": "howrah", "name": "Platform 8", "x": 20, "y": 25, "floor": 1 },
+    { "id": "hwh_p23", "stationId": "howrah", "name": "Platform 23", "x": 80, "y": 25, "floor": 1 }
+  ],
+  "edges": [
+    { "id": "e1", "stationId": "central", "fromNode": "node_entrance", "toNode": "node_restroom", "distance": 30 },
+    { "id": "e2", "stationId": "central", "fromNode": "node_restroom", "toNode": "node_food", "distance": 25 },
+    { "id": "e3", "stationId": "central", "fromNode": "node_food", "toNode": "node_coffee", "distance": 20 },
+    { "id": "e4", "stationId": "central", "fromNode": "node_entrance", "toNode": "node_atm", "distance": 50 },
+    { "id": "e5", "stationId": "central", "fromNode": "node_atm", "toNode": "node_platform_info", "distance": 40 },
+    { "id": "e6", "stationId": "central", "fromNode": "node_platform_info", "toNode": "node_elevator", "distance": 35 },
+    { "id": "e7", "stationId": "central", "fromNode": "node_elevator", "toNode": "node_waiting", "distance": 45 },
+    { "id": "e8", "stationId": "central", "fromNode": "node_waiting", "toNode": "node_platform_junction", "distance": 60 },
+    { "id": "e9", "stationId": "central", "fromNode": "node_coffee", "toNode": "node_platform_junction", "distance": 25 },
+    { "id": "e10", "stationId": "central", "fromNode": "node_platform_junction", "toNode": "node_platform4", "distance": 10 },
+    { "id": "e11", "stationId": "central", "fromNode": "node_platform_junction", "toNode": "node_platform3", "distance": 20 },
+    { "id": "e12", "stationId": "central", "fromNode": "node_platform_junction", "toNode": "node_platform2", "distance": 80 },
+    { "id": "e13", "stationId": "central", "fromNode": "node_platform_junction", "toNode": "node_platform1", "distance": 120 },
+    { "id": "e14", "stationId": "central", "fromNode": "node_restroom", "toNode": "node_waiting", "distance": 40 },
+    { "id": "e15", "stationId": "central", "fromNode": "node_entrance", "toNode": "node_platform_info", "distance": 60 },
+
+    { "id": "es1", "stationId": "secunderabad", "fromNode": "sc_entrance", "toNode": "sc_ticket", "distance": 25 },
+    { "id": "es2", "stationId": "secunderabad", "fromNode": "sc_ticket", "toNode": "sc_lounge", "distance": 35 },
+    { "id": "es3", "stationId": "secunderabad", "fromNode": "sc_ticket", "toNode": "sc_food", "distance": 35 },
+    { "id": "es4", "stationId": "secunderabad", "fromNode": "sc_ticket", "toNode": "sc_elevator", "distance": 40 },
+    { "id": "es5", "stationId": "secunderabad", "fromNode": "sc_lounge", "toNode": "sc_p1", "distance": 45 },
+    { "id": "es6", "stationId": "secunderabad", "fromNode": "sc_elevator", "toNode": "sc_p1", "distance": 30 },
+    { "id": "es7", "stationId": "secunderabad", "fromNode": "sc_elevator", "toNode": "sc_p10", "distance": 40 },
+    { "id": "es8", "stationId": "secunderabad", "fromNode": "sc_food", "toNode": "sc_p10", "distance": 45 },
+
+    { "id": "eb1", "stationId": "vijayawada", "fromNode": "bza_entrance", "toNode": "bza_food", "distance": 35 },
+    { "id": "eb2", "stationId": "vijayawada", "fromNode": "bza_entrance", "toNode": "bza_drinking_water", "distance": 35 },
+    { "id": "eb3", "stationId": "vijayawada", "fromNode": "bza_food", "toNode": "bza_elevator", "distance": 35 },
+    { "id": "eb4", "stationId": "vijayawada", "fromNode": "bza_drinking_water", "toNode": "bza_elevator", "distance": 35 },
+    { "id": "eb5", "stationId": "vijayawada", "fromNode": "bza_elevator", "toNode": "bza_p1", "distance": 40 },
+    { "id": "eb6", "stationId": "vijayawada", "fromNode": "bza_elevator", "toNode": "bza_p10", "distance": 45 },
+
+    { "id": "ep1", "stationId": "prayagraj", "fromNode": "pryj_civil_lines", "toNode": "pryj_booking", "distance": 35 },
+    { "id": "ep2", "stationId": "prayagraj", "fromNode": "pryj_civil_lines", "toNode": "pryj_waiting", "distance": 35 },
+    { "id": "ep3", "stationId": "prayagraj", "fromNode": "pryj_booking", "toNode": "pryj_overbridge", "distance": 35 },
+    { "id": "ep4", "stationId": "prayagraj", "fromNode": "pryj_waiting", "toNode": "pryj_overbridge", "distance": 35 },
+    { "id": "ep5", "stationId": "prayagraj", "fromNode": "pryj_overbridge", "toNode": "pryj_p1", "distance": 45 },
+    { "id": "ep6", "stationId": "prayagraj", "fromNode": "pryj_overbridge", "toNode": "pryj_p10", "distance": 45 },
+
+    { "id": "en1", "stationId": "new_delhi", "fromNode": "ndls_entrance_paharganj", "toNode": "ndls_food_court", "distance": 60 },
+    { "id": "en2", "stationId": "new_delhi", "fromNode": "ndls_entrance_ajmeri", "toNode": "ndls_food_court", "distance": 60 },
+    { "id": "en3", "stationId": "new_delhi", "fromNode": "ndls_food_court", "toNode": "ndls_lounge", "distance": 35 },
+    { "id": "en4", "stationId": "new_delhi", "fromNode": "ndls_food_court", "toNode": "ndls_ramp", "distance": 40 },
+    { "id": "en5", "stationId": "new_delhi", "fromNode": "ndls_lounge", "toNode": "ndls_p1", "distance": 50 },
+    { "id": "en6", "stationId": "new_delhi", "fromNode": "ndls_ramp", "toNode": "ndls_p1", "distance": 45 },
+    { "id": "en7", "stationId": "new_delhi", "fromNode": "ndls_ramp", "toNode": "ndls_p16", "distance": 45 },
+
+    { "id": "em1", "stationId": "mumbai_csmt", "fromNode": "csmt_heritage_gate", "toNode": "csmt_booking", "distance": 30 },
+    { "id": "em2", "stationId": "mumbai_csmt", "fromNode": "csmt_heritage_gate", "toNode": "csmt_drinking_water", "distance": 30 },
+    { "id": "em3", "stationId": "mumbai_csmt", "fromNode": "csmt_booking", "toNode": "csmt_subway", "distance": 35 },
+    { "id": "em4", "stationId": "mumbai_csmt", "fromNode": "csmt_drinking_water", "toNode": "csmt_subway", "distance": 35 },
+    { "id": "em5", "stationId": "mumbai_csmt", "fromNode": "csmt_subway", "toNode": "csmt_p1", "distance": 50 },
+    { "id": "em6", "stationId": "mumbai_csmt", "fromNode": "csmt_subway", "toNode": "csmt_p18", "distance": 65 },
+
+    { "id": "ec1", "stationId": "chennai_central", "fromNode": "mas_entrance", "toNode": "mas_waiting", "distance": 35 },
+    { "id": "ec2", "stationId": "chennai_central", "fromNode": "mas_entrance", "toNode": "mas_food", "distance": 35 },
+    { "id": "ec3", "stationId": "chennai_central", "fromNode": "mas_waiting", "toNode": "mas_escalator", "distance": 35 },
+    { "id": "ec4", "stationId": "chennai_central", "fromNode": "mas_food", "toNode": "mas_escalator", "distance": 35 },
+    { "id": "ec5", "stationId": "chennai_central", "fromNode": "mas_escalator", "toNode": "mas_p1", "distance": 40 },
+    { "id": "ec6", "stationId": "chennai_central", "fromNode": "mas_escalator", "toNode": "mas_p12", "distance": 45 },
+
+    { "id": "eh1", "stationId": "howrah", "fromNode": "hwh_entrance", "toNode": "hwh_booking", "distance": 30 },
+    { "id": "eh2", "stationId": "howrah", "fromNode": "hwh_entrance", "toNode": "hwh_atm", "distance": 30 },
+    { "id": "eh3", "stationId": "howrah", "fromNode": "hwh_booking", "toNode": "hwh_restroom", "distance": 25 },
+    { "id": "eh4", "stationId": "howrah", "fromNode": "hwh_atm", "toNode": "hwh_food", "distance": 25 },
+    { "id": "eh5", "stationId": "howrah", "fromNode": "hwh_restroom", "toNode": "hwh_p8", "distance": 40 },
+    { "id": "eh6", "stationId": "howrah", "fromNode": "hwh_food", "toNode": "hwh_p23", "distance": 40 },
+    { "id": "eh7", "stationId": "howrah", "fromNode": "hwh_booking", "toNode": "hwh_p8", "distance": 55 },
+    { "id": "eh8", "stationId": "howrah", "fromNode": "hwh_atm", "toNode": "hwh_p23", "distance": 55 }
+  ],
+  "trains": [
+    { "id": "t1", "stationId": "central", "trainNo": "12863", "name": "Superfast Express", "arrivalTime": "10:36 AM", "platform": "2", "status": "On Time", "statusText": "On Time" },
+    { "id": "t2", "stationId": "central", "trainNo": "12723", "name": "Intercity Express", "arrivalTime": "11:10 AM", "platform": "4", "status": "Delayed", "statusText": "Delayed by 15m" },
+    { "id": "t3", "stationId": "central", "trainNo": "12615", "name": "Passenger Special", "arrivalTime": "11:45 AM", "platform": "3", "status": "On Time", "statusText": "On Time" },
+
+    { "id": "t_sc1", "stationId": "secunderabad", "trainNo": "12728", "name": "Godavari Express", "arrivalTime": "05:15 PM", "platform": "1", "status": "On Time", "statusText": "On Time" },
+    { "id": "t_sc2", "stationId": "secunderabad", "trainNo": "12759", "name": "Charminar Express", "arrivalTime": "06:40 PM", "platform": "10", "status": "Delayed", "statusText": "Delayed by 10m" },
+
+    { "id": "t_bza1", "stationId": "vijayawada", "trainNo": "12710", "name": "Simhadri Express", "arrivalTime": "01:25 PM", "platform": "1", "status": "On Time", "statusText": "On Time" },
+    { "id": "t_bza2", "stationId": "vijayawada", "trainNo": "12722", "name": "Dakshin Express", "arrivalTime": "02:50 PM", "platform": "10", "status": "On Time", "statusText": "On Time" },
+
+    { "id": "t_pryj1", "stationId": "prayagraj", "trainNo": "12560", "name": "Shiv Ganga Express", "arrivalTime": "08:10 PM", "platform": "1", "status": "On Time", "statusText": "On Time" },
+    { "id": "t_pryj2", "stationId": "prayagraj", "trainNo": "12398", "name": "Mahabodhi Express", "arrivalTime": "09:30 PM", "platform": "10", "status": "Delayed", "statusText": "Delayed by 20m" },
+
+    { "id": "t_ndls1", "stationId": "new_delhi", "trainNo": "12002", "name": "Bhopal Shatabdi", "arrivalTime": "06:00 AM", "platform": "1", "status": "On Time", "statusText": "On Time" },
+    { "id": "t_ndls2", "stationId": "new_delhi", "trainNo": "12424", "name": "Rajdhani Express", "arrivalTime": "04:10 PM", "platform": "16", "status": "Delayed", "statusText": "Delayed by 5m" },
+
+    { "id": "t_csmt1", "stationId": "mumbai_csmt", "trainNo": "12105", "name": "Vidarbha Express", "arrivalTime": "07:15 PM", "platform": "1", "status": "On Time", "statusText": "On Time" },
+    { "id": "t_csmt2", "stationId": "mumbai_csmt", "trainNo": "22223", "name": "Vande Bharat Express", "arrivalTime": "08:30 PM", "platform": "18", "status": "On Time", "statusText": "On Time" },
+
+    { "id": "t_mas1", "stationId": "chennai_central", "trainNo": "12622", "name": "Tamil Nadu Express", "arrivalTime": "10:00 PM", "platform": "1", "status": "On Time", "statusText": "On Time" },
+    { "id": "t_mas2", "stationId": "chennai_central", "trainNo": "12655", "name": "Navajeevan Express", "arrivalTime": "11:15 PM", "platform": "12", "status": "Delayed", "statusText": "Delayed by 30m" },
+
+    { "id": "t_hwh1", "stationId": "howrah", "trainNo": "12301", "name": "Howrah Rajdhani", "arrivalTime": "04:50 PM", "platform": "8", "status": "On Time", "statusText": "On Time" },
+    { "id": "t_hwh2", "stationId": "howrah", "trainNo": "12839", "name": "Chennai Mail", "arrivalTime": "11:45 PM", "platform": "23", "status": "Cancelled", "statusText": "Cancelled" }
+  ],
+  "crowd": [
+    { "stationId": "central", "platformNo": "Platform 1", "density": "Low", "percentage": 22 },
+    { "stationId": "central", "platformNo": "Platform 2", "density": "Medium", "percentage": 54 },
+    { "stationId": "central", "platformNo": "Platform 3", "density": "High", "percentage": 82 },
+    { "stationId": "central", "platformNo": "Platform 4", "density": "Medium", "percentage": 48 },
+
+    { "stationId": "secunderabad", "platformNo": "Platform 1", "density": "High", "percentage": 85 },
+    { "stationId": "secunderabad", "platformNo": "Platform 10", "density": "Medium", "percentage": 60 },
+
+    { "stationId": "vijayawada", "platformNo": "Platform 1", "density": "Medium", "percentage": 45 },
+    { "stationId": "vijayawada", "platformNo": "Platform 10", "density": "Low", "percentage": 18 },
+
+    { "stationId": "prayagraj", "platformNo": "Platform 1", "density": "High", "percentage": 90 },
+    { "stationId": "prayagraj", "platformNo": "Platform 10", "density": "Medium", "percentage": 50 },
+
+    { "stationId": "new_delhi", "platformNo": "Platform 1", "density": "High", "percentage": 95 },
+    { "stationId": "new_delhi", "platformNo": "Platform 16", "density": "Medium", "percentage": 65 },
+
+    { "stationId": "mumbai_csmt", "platformNo": "Platform 1", "density": "Medium", "percentage": 55 },
+    { "stationId": "mumbai_csmt", "platformNo": "Platform 18", "density": "High", "percentage": 78 },
+
+    { "stationId": "chennai_central", "platformNo": "Platform 1", "density": "Low", "percentage": 28 },
+    { "stationId": "chennai_central", "platformNo": "Platform 12", "density": "Medium", "percentage": 42 },
+
+    { "stationId": "howrah", "platformNo": "Platform 8", "density": "High", "percentage": 88 },
+    { "stationId": "howrah", "platformNo": "Platform 23", "density": "Medium", "percentage": 58 }
+  ]
+}

@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StationAI - Smart Railway Navigation</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- HTML5-QRCode Scanner (CDN) -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050b18;
+            color: #f1f5f9;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1329;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e2d52;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-[#0b1329] border-b border-[#1a2c54]/50 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-600/30">
+                <i data-lucide="train" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold tracking-tight text-lg">StationAI</h1>
+                <p class="text-xs text-slate-400">Smart Railway Assist & Navigation</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <!-- Clock -->
+            <div class="bg-[#0e172e] border border-[#1a2c54] px-3 py-1.5 rounded-lg text-xs font-mono text-blue-400 flex items-center space-x-1.5 shadow-inner">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                <span id="live-clock">--:--:-- UTC</span>
+            </div>
+
+            <!-- Notifications / Alerts dropdown -->
+            <div class="relative">
+                <button onclick="toggleAlerts()" class="relative bg-[#0e172e] hover:bg-blue-950/40 border border-[#1a2c54] p-2 rounded-xl text-slate-300 hover:text-white transition cursor-pointer" id="alerts-trigger">
+                    <i data-lucide="bell" class="w-4.5 h-4.5"></i>
+                    <span class="absolute -top-1 -right-1 bg-rose-600 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse">2</span>
+                </button>
+                <div id="alerts-dropdown" class="hidden absolute right-0 mt-2.5 w-80 bg-[#0e172e] border border-[#1a2c54] rounded-2xl shadow-2xl py-3.5 z-50 animate-fade-in">
+                    <div class="px-4 pb-2.5 border-b border-[#1a2c54]/50 flex items-center justify-between">
+                        <span class="font-bold text-xs uppercase tracking-wider text-slate-400">Live Station Alerts</span>
+                        <span class="text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-500 font-semibold px-2 py-0.5 rounded">2 Active</span>
+                    </div>
+                    <div class="max-h-64 overflow-y-auto divide-y divide-[#1a2c54]/30">
+                        <div class="p-3 text-xs flex space-x-2.5">
+                            <i data-lucide="alert-triangle" class="w-4.5 h-4.5 text-amber-500 shrink-0 mt-0.5"></i>
+                            <div>
+                                <h4 class="font-bold text-slate-200">Elevator 2 Outage</h4>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Elevator near Platform 4 is down for inspection. Ramps are open.</p>
+                                <span class="text-[9px] text-slate-500 mt-1 block">5 mins ago</span>
+                            </div>
+                        </div>
+                        <div class="p-3 text-xs flex space-x-2.5">
+                            <i data-lucide="info" class="w-4.5 h-4.5 text-blue-400 shrink-0 mt-0.5"></i>
+                            <div>
+                                <h4 class="font-bold text-slate-200">Platform Crowd Alert</h4>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Heavy passenger congestion detected on Platform 2.</p>
+                                <span class="text-[9px] text-slate-500 mt-1 block">15 mins ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Auth Button -->
+            <div class="relative" id="profile-container">
+                <button onclick="openAuthModal()" class="flex items-center space-x-2 bg-[#0e172e] hover:bg-blue-950/40 border border-[#1a2c54] px-3.5 py-1.5 rounded-xl cursor-pointer text-xs text-slate-200 hover:text-white transition">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    <span id="auth-btn-label">Login / Register</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col lg:flex-row">
+        
+        <!-- Left Panel: Sidebar / Planner -->
+        <aside class="w-full lg:w-[380px] bg-[#070d1e] border-r border-[#1a2c54]/30 p-5 space-y-6 flex flex-col justify-between">
+            <div class="space-y-5">
+                <div class="space-y-1.5">
+                    <label class="text-xs uppercase tracking-wider font-bold text-slate-400 block">Select Station</label>
+                    <div class="relative">
+                        <select id="station-select" onchange="onStationChanged()" class="w-full bg-[#111e3f] text-white border border-[#1a2c54] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-blue-500 appearance-none cursor-pointer">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-slate-400">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Route Planner -->
+                <div class="bg-[#0b1329] border border-[#1a2c54] rounded-2xl p-4.5 space-y-4 shadow-xl">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="navigation" class="w-4.5 h-4.5 text-blue-500 animate-pulse"></i>
+                        <h3 class="font-bold text-white text-sm">Plan Your Walking Route</h3>
+                    </div>
+
+                    <div class="space-y-3.5 text-xs relative">
+                        <!-- Origin selection -->
+                        <div class="space-y-1">
+                            <label class="text-slate-400 font-semibold flex items-center space-x-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                                <span>Starting From:</span>
+                            </label>
+                            <select id="origin-select" class="w-full bg-[#111e3f] text-white border border-[#1a2c54]/70 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 cursor-pointer">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+
+                        <!-- Connector vertical line dot -->
+                        <div class="absolute left-4.5 top-11 bottom-11 w-[1.5px] bg-dashed border-l border-slate-700 pointer-events-none"></div>
+
+                        <!-- Destination selection -->
+                        <div class="space-y-1">
+                            <label class="text-slate-400 font-semibold flex items-center space-x-1">
+                                <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
+                                <span>Destination:</span>
+                            </label>
+                            <select id="destination-select" class="w-full bg-[#111e3f] text-white border border-[#1a2c54]/70 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 cursor-pointer">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Path preferences -->
+                    <div class="flex items-center justify-between border-t border-[#1a2c54]/40 pt-3 text-xs text-slate-400">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="wheelchair-checkbox" onchange="calculateRoute()" class="rounded border-[#1a2c54] bg-[#111e3f] text-blue-600 focus:ring-0 cursor-pointer">
+                            <span>Wheelchair Accessible Only</span>
+                        </label>
+                    </div>
+
+                    <button onclick="calculateRoute()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md shadow-blue-600/20 flex items-center justify-center space-x-1.5 cursor-pointer">
+                        <i data-lucide="compass" class="w-4.5 h-4.5"></i>
+                        <span>Generate Walking Path</span>
+                    </button>
+                </div>
+
+                <!-- Path statistics / Turn by turn steps -->
+                <div id="route-steps-container" class="hidden bg-[#0b1329] border border-[#1a2c54] rounded-2xl p-4.5 space-y-3 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-[#1a2c54]/50 pb-2.5">
+                        <h4 class="font-bold text-white text-xs uppercase tracking-wider">Directions Guide</h4>
+                        <div class="flex space-x-3 text-xs text-blue-400 font-mono">
+                            <span id="route-stat-distance">--m</span>
+                            <span id="route-stat-time">--min</span>
+                        </div>
+                    </div>
+                    <div id="route-steps-list" class="space-y-3.5 max-h-56 overflow-y-auto pr-1">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer info -->
+            <div class="border-t border-[#1a2c54]/30 pt-4 text-center">
+                <p class="text-[10px] text-slate-500 font-mono">STATIONAI PRO v3.2 • CLOUD INTEGRATED</p>
+            </div>
+        </aside>
+
+        <!-- Center Panel: Interactive Map Canvas -->
+        <main class="flex-1 p-6 space-y-6 flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-white font-bold text-base tracking-tight flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping inline-block"></span>
+                        <span id="map-header-title">Live Interactive Layout Map</span>
+                    </h2>
+                    <div class="flex space-x-2 bg-[#0e172e] border border-[#1a2c54] p-0.5 rounded-lg text-[10px] font-mono">
+                        <span class="px-2 py-1 text-slate-400">Current Station:</span>
+                        <span id="station-badge" class="bg-blue-500 text-white px-2 py-1 rounded">CEN</span>
+                    </div>
+                </div>
+
+                <!-- SVG Interactive Map -->
+                <div class="bg-[#0b1329] border border-[#1a2c54] rounded-2xl p-4 shadow-2xl relative flex flex-col items-center justify-center">
+                    <!-- SVG Canvas -->
+                    <div class="w-full relative min-h-[350px] bg-slate-950/40 rounded-xl border border-[#1a2c54]/30 overflow-hidden">
+                        <svg id="station-map-svg" class="w-full h-[350px]" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <!-- Connections / Edges (drawn dynamically) -->
+                            <g id="svg-edges"></g>
+                            <!-- Highlighted path (drawn dynamically) -->
+                            <g id="svg-active-path"></g>
+                            <!-- Nodes (drawn dynamically) -->
+                            <g id="svg-nodes"></g>
+                        </svg>
+
+                        <!-- Hover Details Box -->
+                        <div id="map-tooltip" class="hidden absolute bg-slate-900 border border-blue-500/50 p-2.5 rounded-lg text-[11px] shadow-2xl pointer-events-none z-30 space-y-0.5 animate-fade-in text-white">
+                            <h4 id="tooltip-title" class="font-bold">Restroom Block</h4>
+                            <p id="tooltip-info" class="text-slate-400 font-mono">Coordinates: 78, 56</p>
+                        </div>
+                    </div>
+
+                    <!-- Map Legend indicator indicators -->
+                    <div class="flex flex-wrap items-center justify-center gap-4 mt-3 text-[10px] text-slate-400 font-semibold border-t border-[#1a2c54]/30 pt-3 w-full">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+                            <span>Standard Node</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>
+                            <span>Platform Target</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                            <span>Amenities / Lift</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-4 h-[2px] bg-orange-500 inline-block"></span>
+                            <span>Active Route Pathfinder</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Facilities grid and QR code scan simulation -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Amenities quick overview -->
+                <div class="bg-[#0b1329] border border-[#1a2c54] rounded-2xl p-5 space-y-4 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-[#1a2c54]/50 pb-2.5">
+                        <h3 class="font-bold text-white text-sm">Station Amenities & Services</h3>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Operational Status</span>
+                    </div>
+                    <div id="facilities-grid" class="grid grid-cols-2 gap-3.5 max-h-56 overflow-y-auto pr-1">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- QR Scanner simulator -->
+                <div class="bg-[#0b1329] border border-[#1a2c54] rounded-2xl p-5 space-y-4 shadow-xl flex flex-col justify-between">
+                    <div class="space-y-1 pb-2 border-b border-[#1a2c54]/30">
+                        <h3 class="font-bold text-white text-sm">Station QR Code Reader</h3>
+                        <p class="text-slate-400 text-xs">Simulate physical terminal posters scanning to self-locate</p>
+                    </div>
+
+                    <!-- Webcam live QR placeholder / File Upload -->
+                    <div class="space-y-3">
+                        <div id="reader" class="w-full bg-slate-950/40 rounded-xl border-2 border-dashed border-[#1a2c54] p-4 flex flex-col items-center justify-center text-center relative overflow-hidden" style="min-height: 180px;">
+                            <div class="space-y-2 text-slate-400" id="reader-welcome">
+                                <i data-lucide="qr-code" class="w-10 h-10 mx-auto text-blue-500 animate-pulse"></i>
+                                <p class="text-xs font-bold text-slate-300">Start Camera Scanner</p>
+                                <button onclick="startQRScanner()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-[11px] transition cursor-pointer">Activate Webcam</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="qr-scan-message" class="hidden bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs text-center p-2.5 rounded-xl animate-fade-in font-bold">
+                        Successfully positioned start location!
+                    </div>
+
+                    <!-- Quick select tag list -->
+                    <div class="space-y-1.5 text-xs pt-2">
+                        <label class="text-slate-300 font-semibold block">Click to simulate scanning station code:</label>
+                        <div class="grid grid-cols-3 gap-2" id="scannable-tags-grid">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel: AI Live Assistant Chat -->
+        <aside class="w-full lg:w-[350px] bg-[#070d1e] border-l border-[#1a2c54]/30 p-5 flex flex-col justify-between">
+            <div class="flex-1 flex flex-col justify-between space-y-4">
+                <div class="space-y-2 border-b border-[#1a2c54]/30 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-gradient-to-tr from-blue-500 to-indigo-600 p-1.5 rounded-lg text-white">
+                            <i data-lucide="bot" class="w-5 h-5 animate-pulse"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">StationAI Chat Companion</h3>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Ask about trains, restrooms, ATMs, food court, or wheelchair elevator assistance.</p>
+                </div>
+
+                <!-- Chat history bubble window -->
+                <div id="chat-window" class="flex-1 overflow-y-auto space-y-3.5 pr-1 min-h-[260px] max-h-[380px]">
+                    <!-- Assistant introduction bubble -->
+                    <div class="flex items-start space-x-2.5">
+                        <div class="bg-blue-600/10 border border-blue-500/20 p-1 rounded-md mt-0.5 shrink-0 text-blue-400">
+                            <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <div class="bg-[#0e172e] border border-[#1a2c54] p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 leading-relaxed max-w-[85%]">
+                            Hello! I am your AI Railway Assistant. Feel free to ask me anything about Central Station's facilities, or how to navigate around the platforms. How can I help you?
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggested quick help queries -->
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Frequently Asked</label>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="askChatbot('Where is the restroom?')" class="bg-[#111e3f] hover:bg-blue-900/30 border border-[#1a2c54] hover:border-blue-500 text-slate-300 hover:text-white text-[10px] font-semibold px-2.5 py-1 rounded-lg transition cursor-pointer">Restroom location</button>
+                        <button onclick="askChatbot('Do you have an ATM operational?')" class="bg-[#111e3f] hover:bg-blue-900/30 border border-[#1a2c54] hover:border-blue-500 text-slate-300 hover:text-white text-[10px] font-semibold px-2.5 py-1 rounded-lg transition cursor-pointer">Find active ATM</button>
+                        <button onclick="askChatbot('How to get elevator access?')" class="bg-[#111e3f] hover:bg-blue-900/30 border border-[#1a2c54] hover:border-blue-500 text-slate-300 hover:text-white text-[10px] font-semibold px-2.5 py-1 rounded-lg transition cursor-pointer">Wheelchair Lift</button>
+                    </div>
+                </div>
+
+                <!-- Input box -->
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="chat-input" onkeydown="handleChatKey(event)" placeholder="Ask about amenities, crowd levels..." class="flex-1 bg-[#111e3f] text-white border border-[#1a2c54] rounded-xl px-3 py-2.5 text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500">
+                    <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition shadow-lg shadow-blue-600/10 cursor-pointer">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Auth Modal (Overlay dialog) -->
+    <div id="auth-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-[#0e172e] border border-[#1a2c54] w-full max-w-sm rounded-2xl shadow-2xl p-6 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="auth-modal-content" class="space-y-4">
+                <div class="text-center space-y-1">
+                    <h3 class="font-bold text-white text-base" id="auth-title">Passenger Access Hub</h3>
+                    <p class="text-slate-400 text-xs" id="auth-subtitle">Login to save your accessibility profile & trip log</p>
+                </div>
+                <!-- Login form -->
+                <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3.5 text-xs">
+                    <div class="space-y-1">
+                        <label class="text-slate-400 font-semibold">Email Address:</label>
+                        <input type="email" id="auth-email" required class="w-full bg-[#111e3f] border border-[#1a2c54] rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-slate-400 font-semibold">Password:</label>
+                        <input type="password" id="auth-password" required class="w-full bg-[#111e3f] border border-[#1a2c54] rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="space-y-1 hidden" id="auth-name-container">
+                        <label class="text-slate-400 font-semibold">Full Name:</label>
+                        <input type="text" id="auth-name" class="w-full bg-[#111e3f] border border-[#1a2c54] rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs transition cursor-pointer" id="auth-submit-btn">Login</button>
+                </form>
+                <div class="text-center pt-2 text-xs border-t border-[#1a2c54]/30">
+                    <button onclick="toggleAuthMode()" class="text-blue-400 hover:text-blue-300 transition" id="auth-mode-toggle">Don't have an account? Register instead</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Javascript Code -->
+    <script>
+        // State variables
+        let stations = [];
+        let nodes = [];
+        let selectedStationId = 'central';
+        let currentUser = null;
+        let isRegistering = false;
+        let html5QrScanner = null;
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Apply lucide icons
+            lucide.createIcons();
+            
+            // Set live clock
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // Load data
+            await fetchStations();
+            await onStationChanged();
+            await checkAuthSession();
+        });
+
+        // Set live system clock
+        function updateClock() {
+            const now = new Date();
+            const format = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+            document.getElementById('live-clock').innerText = format;
+        }
+
+        // Dropdown Alert toggler
+        function toggleAlerts() {
+            const el = document.getElementById('alerts-dropdown');
+            el.classList.toggle('hidden');
+        }
+
+        // Fetch all railway stations list
+        async function fetchStations() {
+            try {
+                const res = await fetch('/api/stations');
+                stations = await res.json();
+                
+                const select = document.getElementById('station-select');
+                select.innerHTML = '';
+                
+                stations.forEach(st => {
+                    const opt = document.createElement('option');
+                    opt.value = st.id;
+                    opt.innerText = `${st.name} (${st.code})`;
+                    select.appendChild(opt);
+                });
+
+                if (stations.length > 0) {
+                    selectedStationId = stations[0].id;
+                }
+            } catch (e) {
+                console.error("Stations fetch error:", e);
+            }
+        }
+
+        // Fetch nodes & draw layout map when station changes
+        async function onStationChanged() {
+            const select = document.getElementById('station-select');
+            if (select.value) {
+                selectedStationId = select.value;
+            }
+
+            const station = stations.find(s => s.id === selectedStationId);
+            if (station) {
+                document.getElementById('station-badge').innerText = station.code;
+                document.getElementById('map-header-title').innerText = `${station.name} Navigation Map`;
+            }
+
+            // Fetch nodes
+            try {
+                const res = await fetch(`/api/navigation/nodes/${selectedStationId}`);
+                nodes = await res.json();
+
+                // Populate Origin/Target dropdowns
+                populateDropdowns();
+
+                // Fetch facilities
+                const facRes = await fetch(`/api/facilities/${selectedStationId}`);
+                const facilities = await facRes.json();
+                populateFacilities(facilities);
+
+                // Re-draw clean initial interactive SVG layout
+                drawInitialMap();
+                
+                // Reset route planner containers
+                document.getElementById('route-steps-container').classList.add('hidden');
+            } catch (err) {
+                console.error("Layout load error:", err);
+            }
+        }
+
+        // Populate Origin/Target list
+        function populateDropdowns() {
+            const oSel = document.getElementById('origin-select');
+            const dSel = document.getElementById('destination-select');
+            
+            oSel.innerHTML = '';
+            dSel.innerHTML = '';
+
+            // Add standard options sorted alphabetically
+            const sorted = [...nodes].sort((a,b) => a.name.localeCompare(b.name));
+            
+            sorted.forEach(n => {
+                const opt1 = document.createElement('option');
+                opt1.value = n.id;
+                opt1.innerText = n.name;
+                oSel.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = n.id;
+                opt2.innerText = n.name;
+                dSel.appendChild(opt2);
+            });
+
+            // Set different defaults
+            const entrance = nodes.find(n => n.id.includes('entrance'));
+            if (entrance) oSel.value = entrance.id;
+
+            const restroom = nodes.find(n => n.id.includes('restroom'));
+            if (restroom) dSel.value = restroom.id;
+
+            // Populate quick select scannable tags selector
+            populateScannableSelector();
+        }
+
+        // Draw basic SVG network graph layout
+        function drawInitialMap(highlightedPathNodes = []) {
+            const svgEdges = document.getElementById('svg-edges');
+            const svgActivePath = document.getElementById('svg-active-path');
+            const svgNodes = document.getElementById('svg-nodes');
+
+            svgEdges.innerHTML = '';
+            svgActivePath.innerHTML = '';
+            svgNodes.innerHTML = '';
+
+            if (nodes.length === 0) return;
+
+            // Simple coordinate offset matrix for responsive rendering
+            // We draw nodes as clickable circles
+            nodes.forEach(n => {
+                const isPlatform = n.id.includes('platform') && !n.id.includes('info');
+                const isAmenity = n.id.includes('restroom') || n.id.includes('food') || n.id.includes('coffee') || n.id.includes('atm') || n.id.includes('elevator');
+                
+                let fill = '#3b82f6'; // Blue
+                if (isPlatform) fill = '#eab308'; // Yellow
+                if (isAmenity) fill = '#10b981'; // Emerald
+
+                // Create clickable node circle
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', n.x);
+                circle.setAttribute('cy', n.y);
+                circle.setAttribute('r', highlightedPathNodes.some(pn => pn.id === n.id) ? '2.8' : '2.2');
+                circle.setAttribute('fill', fill);
+                circle.setAttribute('class', 'cursor-pointer hover:scale-125 transition-transform stroke-[#050b18] stroke-1 hover:stroke-white');
+                circle.style.transition = 'all 0.15s ease-in-out';
+                
+                // Click handler to select node
+                circle.addEventListener('click', () => {
+                    const origin = document.getElementById('origin-select');
+                    const dest = document.getElementById('destination-select');
+                    // Simple toggling selector logic
+                    if (origin.value === n.id) {
+                        dest.value = n.id;
+                    } else {
+                        origin.value = n.id;
+                    }
+                    calculateRoute();
+                });
+
+                // Tooltip displays
+                circle.addEventListener('mouseenter', (e) => {
+                    showTooltip(n, e);
+                });
+                circle.addEventListener('mouseleave', () => {
+                    hideTooltip();
+                });
+
+                svgNodes.appendChild(circle);
+
+                // Add text label coordinates
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', n.x);
+                text.setAttribute('y', n.y - 4);
+                text.setAttribute('fill', '#94a3b8');
+                text.setAttribute('font-size', '2px');
+                text.setAttribute('font-weight', '600');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = n.name.replace('Passenger ', '').replace('Accessible ', '');
+                svgNodes.appendChild(text);
+            });
+
+            // Re-draw background connections
+            // Since we don't have edges list, draw connections between adjacent closest nodes dynamically or mock
+            // In a real database we draw edges, let's fetch edges
+            fetch(`/api/navigation/nodes/${selectedStationId}`)
+                .then(r => r.json())
+                .then(allNodes => {
+                    // Simulating path connections visually
+                    for(let i=0; i<allNodes.length-1; i++) {
+                        if(i%2 === 0) continue;
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', allNodes[i].x);
+                        line.setAttribute('y1', allNodes[i].y);
+                        line.setAttribute('x2', allNodes[i+1].x);
+                        line.setAttribute('y2', allNodes[i+1].y);
+                        line.setAttribute('stroke', '#1e2d52');
+                        line.setAttribute('stroke-width', '0.5');
+                        line.setAttribute('stroke-dasharray', '1 1');
+                        svgEdges.appendChild(line);
+                    }
+                });
+        }
+
+        // Draw active path dynamically on SVG
+        function drawActivePathSVG(pathNodes) {
+            const svgActivePath = document.getElementById('svg-active-path');
+            svgActivePath.innerHTML = '';
+
+            if (!pathNodes || pathNodes.length < 2) return;
+
+            // Draw orange connector path
+            for(let i=0; i < pathNodes.length - 1; i++) {
+                const p1 = pathNodes[i];
+                const p2 = pathNodes[i+1];
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', p1.x);
+                line.setAttribute('y1', p1.y);
+                line.setAttribute('x2', p2.x);
+                line.setAttribute('y2', p2.y);
+                line.setAttribute('stroke', '#f97316'); // Orange
+                line.setAttribute('stroke-width', '1.5');
+                line.setAttribute('class', 'animate-pulse');
+                svgActivePath.appendChild(line);
+            }
+
+            // Draw glowing circles at start and end
+            const start = pathNodes[0];
+            const startCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            startCircle.setAttribute('cx', start.x);
+            startCircle.setAttribute('cy', start.y);
+            startCircle.setAttribute('r', '3.5');
+            startCircle.setAttribute('fill', 'none');
+            startCircle.setAttribute('stroke', '#10b981');
+            startCircle.setAttribute('stroke-width', '1');
+            svgActivePath.appendChild(startCircle);
+
+            const end = pathNodes[pathNodes.length - 1];
+            const endCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            endCircle.setAttribute('cx', end.x);
+            endCircle.setAttribute('cy', end.y);
+            endCircle.setAttribute('r', '3.5');
+            endCircle.setAttribute('fill', 'none');
+            endCircle.setAttribute('stroke', '#f43f5e');
+            endCircle.setAttribute('stroke-width', '1');
+            svgActivePath.appendChild(endCircle);
+        }
+
+        // Show SVG Map Node tooltip
+        function showTooltip(node, event) {
+            const tooltip = document.getElementById('map-tooltip');
+            const svgRect = document.getElementById('station-map-svg').getBoundingClientRect();
+            
+            // Calculate absolute pixel coordinates relative to the SVG wrapper
+            const percentX = node.x / 100;
+            const percentY = node.y / 100;
+            
+            tooltip.style.left = `${percentX * svgRect.width + 10}px`;
+            tooltip.style.top = `${percentY * svgRect.height - 35}px`;
+            
+            document.getElementById('tooltip-title').innerText = node.name;
+            document.getElementById('tooltip-info').innerText = `Floor: ${node.floor === 1 ? '1 (Platforms)' : '0 (Ground Floor)'}`;
+            
+            tooltip.classList.remove('hidden');
+        }
+
+        function hideTooltip() {
+            document.getElementById('map-tooltip').classList.add('hidden');
+        }
+
+        // Fetch Dijkstra route walk steps and render
+        async function calculateRoute() {
+            const fromNode = document.getElementById('origin-select').value;
+            const toNode = document.getElementById('destination-select').value;
+            const avoidsSteps = document.getElementById('wheelchair-checkbox').checked;
+
+            if (!fromNode || !toNode) return;
+
+            try {
+                const res = await fetch(`/api/navigation/route?stationId=${selectedStationId}&fromNode=${fromNode}&toNode=${toNode}`);
+                if (!res.ok) {
+                    alert("No direct route found. Try selecting different locations.");
+                    return;
+                }
+
+                const result = await res.json();
+                
+                // Show statistics panel
+                document.getElementById('route-steps-container').classList.remove('hidden');
+                document.getElementById('route-stat-distance').innerText = `${result.totalDistance} meters`;
+                document.getElementById('route-stat-time').innerText = `${result.estimatedTimeMins} mins`;
+
+                // Render lists
+                const list = document.getElementById('route-steps-list');
+                list.innerHTML = '';
+
+                result.steps.forEach((step, idx) => {
+                    const isFirst = idx === 0;
+                    const isLast = idx === result.steps.length - 1;
+
+                    let icon = 'navigation-2';
+                    let color = 'text-blue-400';
+                    if (isFirst) { icon = 'play'; color = 'text-emerald-500'; }
+                    else if (isLast) { icon = 'flag'; color = 'text-rose-500'; }
+                    else if (step.instruction.toLowerCase().includes('right')) { icon = 'corner-up-right'; color = 'text-orange-400'; }
+                    else if (step.instruction.toLowerCase().includes('left')) { icon = 'corner-up-left'; color = 'text-orange-400'; }
+
+                    const item = document.createElement('div');
+                    item.className = 'flex items-start space-x-3 text-xs';
+                    item.innerHTML = `
+                        <div class="${color} mt-0.5">
+                            <i data-lucide="${icon}" class="w-4 h-4"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-slate-200 font-semibold leading-normal">${step.instruction}</p>
+                            ${step.distance > 0 ? `<p class="text-[10px] text-slate-500 mt-0.5 font-mono">${step.distance} meters walk</p>` : ''}
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+
+                // Update SVG paths and highlight nodes
+                drawInitialMap(result.path);
+                drawActivePathSVG(result.path);
+
+                // Re-apply icons inside steps
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Calculation failed:", err);
+            }
+        }
+
+        // Render facilities list cards
+        function populateFacilities(facilities) {
+            const grid = document.getElementById('facilities-grid');
+            grid.innerHTML = '';
+
+            if (facilities.length === 0) {
+                grid.innerHTML = '<div class="col-span-2 text-center text-xs text-slate-500 py-6">No facilities listed.</div>';
+                return;
+            }
+
+            facilities.forEach(fac => {
+                let icon = 'help-circle';
+                if (fac.type === 'restroom') icon = 'info';
+                if (fac.type === 'food_court') icon = 'utensils';
+                if (fac.type === 'coffee_shop') icon = 'coffee';
+                if (fac.type === 'atm') icon = 'credit-card';
+                if (fac.type === 'waiting_area') icon = 'armchair';
+                if (fac.type === 'accessibility') icon = 'accessibility';
+
+                const card = document.createElement('div');
+                card.className = 'bg-[#111e3f] border border-[#1a2c54] p-3 rounded-xl flex items-center justify-between space-x-2 text-xs hover:border-blue-500/50 transition';
+                card.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-blue-600/10 text-blue-400 p-2 rounded-lg">
+                            <i data-lucide="${icon}" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white leading-tight">${fac.name}</h4>
+                            <span class="text-[10px] text-slate-400">${fac.status}</span>
+                        </div>
+                    </div>
+                    <button onclick="locateFacility('${fac.nodeId}')" class="text-blue-400 hover:text-white p-1 hover:bg-slate-800 rounded transition cursor-pointer" title="Find on Map">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // Locate facility directly
+        function locateFacility(nodeId) {
+            const dest = document.getElementById('destination-select');
+            dest.value = nodeId;
+            calculateRoute();
+        }
+
+        // Populate quick QR simulation tags
+        function populateScannableSelector() {
+            const grid = document.getElementById('scannable-tags-grid');
+            grid.innerHTML = '';
+
+            const selection = nodes.slice(0, 6);
+            selection.forEach(n => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-[#111e3f] hover:bg-blue-600 border border-[#1a2c54] hover:border-blue-500 text-slate-300 hover:text-white font-bold text-[9px] py-1 px-2 rounded-lg transition-all cursor-pointer truncate';
+                btn.innerText = n.name.replace('Passenger ', '').replace('Accessible ', '');
+                btn.onclick = () => simulateQRDecoding(n.id);
+                grid.appendChild(btn);
+            });
+        }
+
+        // QR simulation
+        function simulateQRDecoding(nodeId) {
+            const origin = document.getElementById('origin-select');
+            origin.value = nodeId;
+            
+            // Show alert popup
+            const msg = document.getElementById('qr-scan-message');
+            const targetNode = nodes.find(n => n.id === nodeId);
+            msg.innerText = `✅ Located at: "${targetNode.name}"! Set as Start Location.`;
+            msg.classList.remove('hidden');
+
+            calculateRoute();
+
+            setTimeout(() => {
+                msg.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Start HTML5 camera QR reader
+        function startQRScanner() {
+            const welcome = document.getElementById('reader-welcome');
+            welcome.classList.add('hidden');
+
+            document.getElementById('reader').innerHTML = '<div id="scanner-view" class="w-full h-full max-w-sm aspect-square rounded-xl overflow-hidden bg-black"></div>';
+
+            html5QrScanner = new Html5Qrcode("scanner-view");
+            html5QrScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 200 },
+                (decodedText) => {
+                    // Success! Decode matches a node
+                    const matchingNode = nodes.find(n => n.id.toLowerCase() === decodedText.trim().toLowerCase() || n.name.toLowerCase().includes(decodedText.trim().toLowerCase()));
+                    if (matchingNode) {
+                        simulateQRDecoding(matchingNode.id);
+                        html5QrScanner.stop();
+                        resetScannerUI();
+                    } else {
+                        alert(`QR read success: "${decodedText}". However, no corresponding station node was found.`);
+                    }
+                },
+                (err) => {
+                    // frequent readings
+                }
+            ).catch(err => {
+                alert("Failed to access system camera. Standard simulation codes are available below.");
+                resetScannerUI();
+            });
+        }
+
+        function resetScannerUI() {
+            document.getElementById('reader').innerHTML = `
+                <div class="space-y-2 text-slate-400" id="reader-welcome">
+                    <i data-lucide="qr-code" class="w-10 h-10 mx-auto text-blue-500 animate-pulse"></i>
+                    <p class="text-xs font-bold text-slate-300">Start Camera Scanner</p>
+                    <button onclick="startQRScanner()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-[11px] transition cursor-pointer">Activate Webcam</button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // ==================== CHATBOT LOGIC ====================
+
+        function handleChatKey(e) {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            appendChatBubble(msg, true);
+            input.value = '';
+
+            // Add loading typing bubble
+            const loaderId = 'chat-loader-' + Date.now();
+            appendChatLoader(loaderId);
+
+            try {
+                const res = await fetch('/api/chatbot', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ message: msg, stationId: selectedStationId })
+                });
+                const data = await res.json();
+                
+                // Remove loader
+                document.getElementById(loaderId).remove();
+                appendChatBubble(data.reply, false);
+            } catch (err) {
+                document.getElementById(loaderId).remove();
+                appendChatBubble("I am experiencing connectivity issues. Please try again or use the navigation options.", false);
+            }
+        }
+
+        function askChatbot(promptText) {
+            document.getElementById('chat-input').value = promptText;
+            sendChatMessage();
+        }
+
+        function appendChatBubble(text, isUser) {
+            const win = document.getElementById('chat-window');
+            const bubble = document.createElement('div');
+            
+            if (isUser) {
+                bubble.className = 'flex items-start justify-end space-x-2.5';
+                bubble.innerHTML = `
+                    <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none text-xs leading-relaxed max-w-[85%]">
+                        ${text}
+                    </div>
+                `;
+            } else {
+                bubble.className = 'flex items-start space-x-2.5';
+                bubble.innerHTML = `
+                    <div class="bg-blue-600/10 border border-blue-500/20 p-1 rounded-md mt-0.5 shrink-0 text-blue-400">
+                        <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+                    </div>
+                    <div class="bg-[#0e172e] border border-[#1a2c54] p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 leading-relaxed max-w-[85%]">
+                        ${text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+                    </div>
+                `;
+            }
+
+            win.appendChild(bubble);
+            win.scrollTop = win.scrollHeight;
+            lucide.createIcons();
+        }
+
+        function appendChatLoader(id) {
+            const win = document.getElementById('chat-window');
+            const ldr = document.createElement('div');
+            ldr.id = id;
+            ldr.className = 'flex items-start space-x-2.5 animate-pulse';
+            ldr.innerHTML = `
+                <div class="bg-blue-600/10 p-1 rounded-md text-blue-400 shrink-0">
+                    <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+                </div>
+                <div class="bg-[#0e172e] border border-[#1a2c54] p-3 rounded-2xl rounded-tl-none text-xs text-slate-400 italic">
+                    AI Companion is writing...
+                </div>
+            `;
+            win.appendChild(ldr);
+            win.scrollTop = win.scrollHeight;
+            lucide.createIcons();
+        }
+
+        // ==================== AUTH PORTAL LOGIC ====================
+
+        function openAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            isRegistering = !isRegistering;
+            const title = document.getElementById('auth-title');
+            const sub = document.getElementById('auth-subtitle');
+            const nameField = document.getElementById('auth-name-container');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const toggleBtn = document.getElementById('auth-mode-toggle');
+
+            if (isRegistering) {
+                title.innerText = 'Register Passenger Profile';
+                sub.innerText = 'Sign up to configure accessibility modes';
+                nameField.classList.remove('hidden');
+                submitBtn.innerText = 'Register';
+                toggleBtn.innerText = 'Already have an account? Login here';
+            } else {
+                title.innerText = 'Passenger Access Hub';
+                sub.innerText = 'Login to save your accessibility profile';
+                nameField.classList.add('hidden');
+                submitBtn.innerText = 'Login';
+                toggleBtn.innerText = "Don't have an account? Register instead";
+            }
+        }
+
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
+
+            const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
+            const payload = isRegistering ? { email, password, name } : { email, password };
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    alert(data.error || "Authentication failed");
+                    return;
+                }
+
+                currentUser = await res.json();
+                updateUserUI();
+                closeAuthModal();
+            } catch (err) {
+                alert("Authentication server unreachable.");
+            }
+        }
+
+        async function checkAuthSession() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (res.ok) {
+                    currentUser = await res.json();
+                    updateUserUI();
+                }
+            } catch (e) {
+                // not logged in
+            }
+        }
+
+        function updateUserUI() {
+            const btn = document.getElementById('profile-container');
+            if (currentUser) {
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-3 bg-[#0e172e] border border-[#1a2c54] px-3.5 py-1.5 rounded-xl text-xs text-slate-200">
+                        <i data-lucide="shield" class="w-4 h-4 text-emerald-500"></i>
+                        <span class="font-bold">${currentUser.name} (${currentUser.role})</span>
+                        <button onclick="handleLogout()" class="text-rose-400 hover:text-rose-300 ml-2 font-bold cursor-pointer">Logout</button>
+                    </div>
+                `;
+            } else {
+                btn.innerHTML = `
+                    <button onclick="openAuthModal()" class="flex items-center space-x-2 bg-[#0e172e] hover:bg-blue-950/40 border border-[#1a2c54] px-3.5 py-1.5 rounded-xl cursor-pointer text-xs text-slate-200 hover:text-white transition">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span>Login / Register</span>
+                    </button>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        async function handleLogout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            currentUser = null;
+            updateUserUI();
+        }
+    </script>
+</body>
+</html>

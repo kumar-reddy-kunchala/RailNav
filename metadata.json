@@ -1,0 +1,11 @@
+{
+  "name": "RailNav System",
+  "description": "RailNav System is a smart railway navigation and passenger guidance system featuring indoor pathfinding, facility tracking, voice guides, accessibility options, and administrative station management.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

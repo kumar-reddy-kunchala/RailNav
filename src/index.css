@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@layer utilities {
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleUp {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.25s ease-out forwards;
+  }
+  .animate-scale-up {
+    animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+/* Custom background dots grid for the SVG map area */
+.bg-grid {
+  background-size: 20px 20px;
+  background-image: radial-gradient(circle, #1a2c54 1px, transparent 1px);
+}
