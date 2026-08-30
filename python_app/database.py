@@ -11,6 +11,18 @@ def init_db(app):
     with app.app_context():
         # Check if we need to create and seed
         db.create_all()
+
+        # Dynamic schema migration: add mapUrl column if it doesn't exist
+        try:
+            db.session.execute(db.text("SELECT mapUrl FROM stations LIMIT 1"))
+        except Exception:
+            db.session.rollback()
+            try:
+                db.session.execute(db.text("ALTER TABLE stations ADD COLUMN mapUrl VARCHAR(200)"))
+                db.session.commit()
+                print("Successfully added mapUrl column to stations table via SQLite migration.")
+            except Exception as ex:
+                print(f"Error adding mapUrl column: {ex}")
         
         # Check if tables are empty and seed them
         if Station.query.first() is None:
@@ -83,7 +95,8 @@ def seed_database():
                 facilitiesCount=s.get('facilitiesCount', 0),
                 activeRoutesCount=s.get('activeRoutesCount', 0),
                 crowdStatus=s.get('crowdStatus', 'Medium'),
-                zone=s.get('zone', 'other')
+                zone=s.get('zone', 'other'),
+                mapUrl=s.get('mapUrl')
             )
             db.session.add(station)
 

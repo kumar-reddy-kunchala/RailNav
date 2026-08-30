@@ -33,6 +33,7 @@ class Station(db.Model):
     activeRoutesCount = db.Column(db.Integer, default=0)
     crowdStatus = db.Column(db.String(20), default='Medium')
     zone = db.Column(db.String(50))
+    mapUrl = db.Column(db.String(200), nullable=True)
 
     def to_dict(self):
         return {
@@ -43,7 +44,8 @@ class Station(db.Model):
             "facilitiesCount": self.facilitiesCount,
             "activeRoutesCount": self.activeRoutesCount,
             "crowdStatus": self.crowdStatus,
-            "zone": self.zone
+            "zone": self.zone,
+            "mapUrl": self.mapUrl
         }
 
 class Facility(db.Model):

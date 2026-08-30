@@ -27,7 +27,8 @@ export default function IndoorMap({
   onNodeSelect,
   accessibilityMode = false,
   currentStepIndex = 0,
-  lightMode = false
+  lightMode = false,
+  activeStation = null
 }) {
   const [zoom, setZoom] = useState(1);
   const [is3D, setIs3D] = useState(false);
@@ -468,132 +469,153 @@ export default function IndoorMap({
               className="transition-all duration-300"
             />
             
-            {/* PLATFORMS & TRAIN TRACKS SECTOR */}
-            <g id="tracks-platforms-blueprint">
-              {/* Rails Track Bed Area */}
-              <rect 
-                x="24" 
-                y="84" 
-                width="752" 
-                height="46" 
-                fill={lightMode ? '#f1f5f9' : '#050a14'} 
-                rx="6"
-              />
-              
-              {/* Rail sleepers ties (vertical lines) */}
-              {Array.from({ length: 38 }).map((_, i) => (
-                <line 
-                  key={i} 
-                  x1={30 + i * 20} 
-                  y1="86" 
-                  x2={30 + i * 20} 
-                  y2="126" 
-                  stroke={lightMode ? '#cbd5e1' : '#1a2233'} 
-                  strokeWidth="2.5" 
+            {activeStation?.mapUrl ? (
+              <g id="custom-uploaded-map">
+                <defs>
+                  <clipPath id="map-rect-clip">
+                    <rect x="22" y="82" width="756" height="396" rx="22" />
+                  </clipPath>
+                </defs>
+                <image
+                  href={activeStation.mapUrl}
+                  x="20"
+                  y="80"
+                  width="760"
+                  height="400"
+                  preserveAspectRatio="xMidYMid meet"
+                  clipPath="url(#map-rect-clip)"
                 />
-              ))}
-
-              {/* Rails Steel Lines */}
-              <line x1="24" y1="96" x2="776" y2="96" stroke={lightMode ? '#64748b' : '#334155'} strokeWidth="2.5" />
-              <line x1="24" y1="114" x2="776" y2="114" stroke={lightMode ? '#64748b' : '#334155'} strokeWidth="2.5" />
-              
-              {/* Platform concrete floor bar */}
-              <rect 
-                x="24" 
-                y="130" 
-                width="752" 
-                height="32" 
-                fill={lightMode ? '#e2e8f0' : '#0f172a'} 
-                stroke={lightMode ? '#cbd5e1' : '#1e2d52'} 
-                strokeWidth="1.5" 
-              />
-              
-              {/* Safety tactile warning yellow strip (pulsing amber glow) */}
-              <rect x="24" y="130" width="752" height="4" fill="#f59e0b" />
-              <line 
-                x1="24" 
-                y1="132" 
-                x2="776" 
-                y2="132" 
-                stroke="#d97706" 
-                strokeWidth="2" 
-                strokeDasharray="4, 4" 
-              />
-
-              {/* Platform division gates */}
-              <line x1="210" y1="130" x2="210" y2="162" stroke={lightMode ? '#94a3b8' : '#1e2d52'} strokeWidth="2" />
-              <line x1="400" y1="130" x2="400" y2="162" stroke={lightMode ? '#94a3b8' : '#1e2d52'} strokeWidth="2" />
-              <line x1="590" y1="130" x2="590" y2="162" stroke={lightMode ? '#94a3b8' : '#1e2d52'} strokeWidth="2" />
-              
-              {/* Platform labels */}
-              <text x="117" y="150" fill={lightMode ? '#334155' : '#8fa2c4'} fontSize="11" fontWeight="800" textAnchor="middle" letterSpacing="0.5">PLATFORM 1</text>
-              <text x="305" y="150" fill={lightMode ? '#334155' : '#8fa2c4'} fontSize="11" fontWeight="800" textAnchor="middle" letterSpacing="0.5">PLATFORM 2</text>
-              <text x="495" y="150" fill={lightMode ? '#334155' : '#8fa2c4'} fontSize="11" fontWeight="800" textAnchor="middle" letterSpacing="0.5">PLATFORM 3</text>
-              <text x="683" y="150" fill={lightMode ? '#334155' : '#8fa2c4'} fontSize="11" fontWeight="800" textAnchor="middle" letterSpacing="0.5">PLATFORM 4</text>
-            </g>
-
-            {/* CONCOURSE ROOMS & INDOOR ZONE BLOCKS */}
-            <g id="concourse-rooms-blueprint">
-              {/* Restroom Room (Right Concourse) */}
-              <g>
-                <rect x="670" y="250" width="90" height="70" rx="14" fill={lightMode ? '#fff1f2' : '#1a0e1b'} stroke={lightMode ? '#fda4af' : '#4c1d24'} strokeWidth="1.5" />
-                <text x="715" y="290" fill={lightMode ? '#e11d48' : '#fda4af'} fontSize="10" textAnchor="middle" fontWeight="800">Restroom</text>
               </g>
+            ) : (
+              <>
+                {/* PLATFORMS & TRAIN TRACKS SECTOR */}
+                <g id="tracks-platforms-blueprint">
+                  {/* Rails Track Bed Area */}
+                  <rect 
+                    x="24" 
+                    y="84" 
+                    width="752" 
+                    height="46" 
+                    fill={lightMode ? '#f1f5f9' : '#050a14'} 
+                    rx="6"
+                  />
+                  
+                  {/* Rail sleepers ties (vertical lines) */}
+                  {Array.from({ length: 38 }).map((_, i) => (
+                    <line 
+                      key={i} 
+                      x1={30 + i * 20} 
+                      y1="86" 
+                      x2={30 + i * 20} 
+                      y2="126" 
+                      stroke={lightMode ? '#cbd5e1' : '#1a2233'} 
+                      strokeWidth="2.5" 
+                    />
+                  ))}
 
-              {/* Food Court Rooms (Right Concourse) */}
-              <g>
-                <rect x="670" y="180" width="90" height="60" rx="14" fill={lightMode ? '#fef3c7' : '#22160d'} stroke={lightMode ? '#fcd34d' : '#451a03'} strokeWidth="1.5" />
-                <text x="715" y="215" fill={lightMode ? '#d97706' : '#fcd34d'} fontSize="10" textAnchor="middle" fontWeight="800">Food Court</text>
-              </g>
+                  {/* Rails Steel Lines */}
+                  <line x1="24" y1="96" x2="776" y2="96" stroke={lightMode ? '#64748b' : '#334155'} strokeWidth="2.5" />
+                  <line x1="24" y1="114" x2="776" y2="114" stroke={lightMode ? '#64748b' : '#334155'} strokeWidth="2.5" />
+                  
+                  {/* Platform concrete floor bar */}
+                  <rect 
+                    x="24" 
+                    y="130" 
+                    width="752" 
+                    height="32" 
+                    fill={lightMode ? '#e2e8f0' : '#0f172a'} 
+                    stroke={lightMode ? '#cbd5e1' : '#1e2d52'} 
+                    strokeWidth="1.5" 
+                  />
+                  
+                  {/* Safety tactile warning yellow strip (pulsing amber glow) */}
+                  <rect x="24" y="130" width="752" height="4" fill="#f59e0b" />
+                  <line 
+                    x1="24" 
+                    y1="132" 
+                    x2="776" 
+                    y2="132" 
+                    stroke="#d97706" 
+                    strokeWidth="2" 
+                    strokeDasharray="4, 4" 
+                  />
 
-              {/* Coffee Shop */}
-              <g>
-                <rect x="670" y="140" width="90" height="32" rx="10" fill={lightMode ? '#faf7f2' : '#1f1610'} stroke={lightMode ? '#cbd5e1' : '#3c2415'} strokeWidth="1.5" />
-                <text x="715" y="160" fill={lightMode ? '#78350f' : '#b45309'} fontSize="8" textAnchor="middle" fontWeight="800">Coffee Store</text>
-              </g>
+                  {/* Platform division gates */}
+                  <line x1="210" y1="130" x2="210" y2="162" stroke={lightMode ? '#94a3b8' : '#1e2d52'} strokeWidth="2" />
+                  <line x1="400" y1="130" x2="400" y2="162" stroke={lightMode ? '#94a3b8' : '#1e2d52'} strokeWidth="2" />
+                  <line x1="590" y1="130" x2="590" y2="162" stroke={lightMode ? '#94a3b8' : '#1e2d52'} strokeWidth="2" />
+                  
+                  {/* Platform labels */}
+                  <text x="117" y="150" fill={lightMode ? '#334155' : '#8fa2c4'} fontSize="11" fontWeight="800" textAnchor="middle" letterSpacing="0.5">PLATFORM 1</text>
+                  <text x="305" y="150" fill={lightMode ? '#334155' : '#8fa2c4'} fontSize="11" fontWeight="800" textAnchor="middle" letterSpacing="0.5">PLATFORM 2</text>
+                  <text x="495" y="150" fill={lightMode ? '#334155' : '#8fa2c4'} fontSize="11" fontWeight="800" textAnchor="middle" letterSpacing="0.5">PLATFORM 3</text>
+                  <text x="683" y="150" fill={lightMode ? '#334155' : '#8fa2c4'} fontSize="11" fontWeight="800" textAnchor="middle" letterSpacing="0.5">PLATFORM 4</text>
+                </g>
 
-              {/* Waiting Lounge (Center) */}
-              <g>
-                <rect x="420" y="210" width="160" height="90" rx="18" fill={lightMode ? '#f0f9ff' : '#0b162a'} stroke={lightMode ? '#93c5fd' : '#1e3a8a'} strokeWidth="2" />
-                <rect x="424" y="214" width="152" height="82" rx="14" fill="none" stroke={lightMode ? '#e0f2fe' : '#172554'} strokeWidth="1" strokeDasharray="3, 3" />
-                <text x="500" y="260" fill={lightMode ? '#0284c7' : '#60a5fa'} fontSize="11" textAnchor="middle" fontWeight="800" letterSpacing="0.5">Waiting Lounge</text>
-              </g>
+                {/* CONCOURSE ROOMS & INDOOR ZONE BLOCKS */}
+                <g id="concourse-rooms-blueprint">
+                  {/* Restroom Room (Right Concourse) */}
+                  <g>
+                    <rect x="670" y="250" width="90" height="70" rx="14" fill={lightMode ? '#fff1f2' : '#1a0e1b'} stroke={lightMode ? '#fda4af' : '#4c1d24'} strokeWidth="1.5" />
+                    <text x="715" y="290" fill={lightMode ? '#e11d48' : '#fda4af'} fontSize="10" textAnchor="middle" fontWeight="800">Restroom</text>
+                  </g>
 
-              {/* ATM Center */}
-              <g>
-                <rect x="330" y="310" width="110" height="52" rx="14" fill={lightMode ? '#ecfdf5' : '#061c15'} stroke={lightMode ? '#6ee7b7' : '#064e3b'} strokeWidth="1.5" />
-                <text x="385" y="341" fill={lightMode ? '#059669' : '#34d399'} fontSize="10" textAnchor="middle" fontWeight="800">ATM Center</text>
-              </g>
+                  {/* Food Court Rooms (Right Concourse) */}
+                  <g>
+                    <rect x="670" y="180" width="90" height="60" rx="14" fill={lightMode ? '#fef3c7' : '#22160d'} stroke={lightMode ? '#fcd34d' : '#451a03'} strokeWidth="1.5" />
+                    <text x="715" y="215" fill={lightMode ? '#d97706' : '#fcd34d'} fontSize="10" textAnchor="middle" fontWeight="800">Food Court</text>
+                  </g>
 
-              {/* Main Entrance */}
-              <g>
-                <rect x="610" y="400" width="130" height="60" rx="16" fill={lightMode ? '#eff6ff' : '#0c1a30'} stroke={lightMode ? '#93c5fd' : '#2563eb'} strokeWidth="2" />
-                <text x="675" y="435" fill={lightMode ? '#2563eb' : '#60a5fa'} fontSize="11" textAnchor="middle" fontWeight="800" letterSpacing="0.5">Main Entrance</text>
-              </g>
-            </g>
+                  {/* Coffee Shop */}
+                  <g>
+                    <rect x="670" y="140" width="90" height="32" rx="10" fill={lightMode ? '#faf7f2' : '#1f1610'} stroke={lightMode ? '#cbd5e1' : '#3c2415'} strokeWidth="1.5" />
+                    <text x="715" y="160" fill={lightMode ? '#78350f' : '#b45309'} fontSize="8" textAnchor="middle" fontWeight="800">Coffee Store</text>
+                  </g>
 
-            {/* MAP CONNECTING WALKWAY PATHS (Polished vector style corridor lanes) */}
-            <g id="walkway-guides" stroke={lightMode ? '#e2e8f0' : '#131e35'} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.8">
-              <path d="M 680,430 L 610,345" />
-              <path d="M 610,345 L 610,215" />
-              <path d="M 610,215 L 680,215" />
-              <path d="M 610,285 L 680,285" />
-              <path d="M 610,345 L 390,345" />
-              <path d="M 390,345 L 390,250" />
-              <path d="M 390,250 L 420,250" />
-              <path d="M 580,250 L 610,215" />
-              <path d="M 610,150 L 680,150" />
-              <path d="M 610,150 L 580,150 L 580,210" />
-              <path d="M 580,150 L 450,150" />
-            </g>
+                  {/* Waiting Lounge (Center) */}
+                  <g>
+                    <rect x="420" y="210" width="160" height="90" rx="18" fill={lightMode ? '#f0f9ff' : '#0b162a'} stroke={lightMode ? '#93c5fd' : '#1e3a8a'} strokeWidth="2" />
+                    <rect x="424" y="214" width="152" height="82" rx="14" fill="none" stroke={lightMode ? '#e0f2fe' : '#172554'} strokeWidth="1" strokeDasharray="3, 3" />
+                    <text x="500" y="260" fill={lightMode ? '#0284c7' : '#60a5fa'} fontSize="11" textAnchor="middle" fontWeight="800" letterSpacing="0.5">Waiting Lounge</text>
+                  </g>
 
-            {/* Subtle inner walker guide overlays */}
-            <g id="walkway-inner-guides" stroke={lightMode ? '#f1f5f9' : '#1e293b'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5">
-              <path d="M 680,430 L 610,345" />
-              <path d="M 610,345 L 610,215" />
-              <path d="M 610,345 L 390,345" />
-              <path d="M 390,345 L 390,250" />
-            </g>
+                  {/* ATM Center */}
+                  <g>
+                    <rect x="330" y="310" width="110" height="52" rx="14" fill={lightMode ? '#ecfdf5' : '#061c15'} stroke={lightMode ? '#6ee7b7' : '#064e3b'} strokeWidth="1.5" />
+                    <text x="385" y="341" fill={lightMode ? '#059669' : '#34d399'} fontSize="10" textAnchor="middle" fontWeight="800">ATM Center</text>
+                  </g>
+
+                  {/* Main Entrance */}
+                  <g>
+                    <rect x="610" y="400" width="130" height="60" rx="16" fill={lightMode ? '#eff6ff' : '#0c1a30'} stroke={lightMode ? '#93c5fd' : '#2563eb'} strokeWidth="2" />
+                    <text x="675" y="435" fill={lightMode ? '#2563eb' : '#60a5fa'} fontSize="11" textAnchor="middle" fontWeight="800" letterSpacing="0.5">Main Entrance</text>
+                  </g>
+                </g>
+
+                {/* MAP CONNECTING WALKWAY PATHS (Polished vector style corridor lanes) */}
+                <g id="walkway-guides" stroke={lightMode ? '#e2e8f0' : '#131e35'} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.8">
+                  <path d="M 680,430 L 610,345" />
+                  <path d="M 610,345 L 610,215" />
+                  <path d="M 610,215 L 680,215" />
+                  <path d="M 610,285 L 680,285" />
+                  <path d="M 610,345 L 390,345" />
+                  <path d="M 390,345 L 390,250" />
+                  <path d="M 390,250 L 420,250" />
+                  <path d="M 580,250 L 610,215" />
+                  <path d="M 610,150 L 680,150" />
+                  <path d="M 610,150 L 580,150 L 580,210" />
+                  <path d="M 580,150 L 450,150" />
+                </g>
+
+                {/* Subtle inner walker guide overlays */}
+                <g id="walkway-inner-guides" stroke={lightMode ? '#f1f5f9' : '#1e293b'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5">
+                  <path d="M 680,430 L 610,345" />
+                  <path d="M 610,345 L 610,215" />
+                  <path d="M 610,345 L 390,345" />
+                  <path d="M 390,345 L 390,250" />
+                </g>
+              </>
+            )}
 
             {/* ACTIVE ROUTE PATH (Google Maps double-layered animated chevrons) */}
             {routeResult && routeResult.path && (

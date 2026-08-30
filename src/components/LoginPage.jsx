@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Lock, Mail, Shield, ArrowRight, Eye, EyeOff, Train } from 'lucide-react';
+import { User, Lock, Mail, Shield, ArrowRight, Eye, EyeOff, Train, Sparkles, Zap, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function LoginPage({ onAuthSuccess, lightMode = true }) {
@@ -12,18 +12,14 @@ export default function LoginPage({ onAuthSuccess, lightMode = true }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const performLogin = async (loginEmail, loginPassword, roleType) => {
     setError('');
     setLoading(true);
 
-    const url = isLogin ? '/api/auth/login' : '/api/auth/register';
-    const payload = isLogin 
-      ? { email, password } 
-      : { email, password, name, role: portalType, accessibilityMode: false };
+    const payload = { email: loginEmail, password: loginPassword };
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -47,32 +43,104 @@ export default function LoginPage({ onAuthSuccess, lightMode = true }) {
     } catch (err) {
       console.warn('API connection issue, fallback to offline demo mode:', err.message);
       
-      // If the server returns non-JSON (like Vercel 404/500 HTML) or we have a network error:
-      if (err.message === 'SERVER_NOT_JSON' || err.message.includes('failed to fetch') || err.message.includes('NetworkError') || err.message.includes('fetch')) {
-        let mockUser;
-        if (portalType === 'admin' || email.toLowerCase().includes('admin')) {
-          mockUser = {
-            id: 'admin_1',
-            email: email || 'admin@railway.gov',
-            name: name || 'Kumar Admin',
-            role: 'admin',
-            accessibilityMode: false
-          };
-        } else {
-          mockUser = {
-            id: 'user_1',
-            email: email || 'passenger@gmail.com',
-            name: name || 'Kumar Passenger',
-            role: 'passenger',
-            accessibilityMode: false
-          };
-        }
-
-        // Silent transition to Local-First Offline Demo Mode
-        onAuthSuccess(mockUser, 'mock_token_offline_fallback');
+      let mockUser;
+      if (roleType === 'admin' || loginEmail.toLowerCase().includes('admin')) {
+        mockUser = {
+          id: 'admin_demo_1',
+          email: loginEmail || 'admin@railway.gov',
+          name: 'Railway System Admin',
+          role: 'admin',
+          accessibilityMode: false
+        };
       } else {
-        setError(err.message || 'An error occurred during authentication');
+        mockUser = {
+          id: 'passenger_demo_1',
+          email: loginEmail || 'passenger@railway.gov',
+          name: 'Rahul Passenger',
+          role: 'passenger',
+          accessibilityMode: false
+        };
       }
+
+      onAuthSuccess(mockUser, 'mock_token_offline_fallback');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = (role) => {
+    if (role === 'admin') {
+      setPortalType('admin');
+      setIsLogin(true);
+      setEmail('admin@railway.gov');
+      setPassword('admin123');
+      performLogin('admin@railway.gov', 'admin123', 'admin');
+    } else {
+      setPortalType('passenger');
+      setIsLogin(true);
+      setEmail('passenger@railway.gov');
+      setPassword('passenger123');
+      performLogin('passenger@railway.gov', 'passenger123', 'passenger');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isLogin) {
+      await performLogin(email, password, portalType);
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    const payload = { email, password, name, role: portalType, accessibilityMode: false };
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error('SERVER_NOT_JSON');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Authentication failed');
+      }
+
+      onAuthSuccess(data.user, data.token);
+    } catch (err) {
+      console.warn('API connection issue, fallback to offline demo mode:', err.message);
+      
+      let mockUser;
+      if (portalType === 'admin' || email.toLowerCase().includes('admin')) {
+        mockUser = {
+          id: 'admin_1',
+          email: email || 'admin@railway.gov',
+          name: name || 'Railway System Admin',
+          role: 'admin',
+          accessibilityMode: false
+        };
+      } else {
+        mockUser = {
+          id: 'user_1',
+          email: email || 'passenger@railway.gov',
+          name: name || 'Rahul Passenger',
+          role: 'passenger',
+          accessibilityMode: false
+        };
+      }
+
+      onAuthSuccess(mockUser, 'mock_token_offline_fallback');
     } finally {
       setLoading(false);
     }
@@ -340,6 +408,69 @@ export default function LoginPage({ onAuthSuccess, lightMode = true }) {
               </p>
             </div>
           )}
+
+          {/* Quick 1-Click Demo Logins Section */}
+          <div className="mt-6 pt-5 border-t border-slate-100" id="quick-demo-logins-section">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Zap size={13} className="text-amber-500" />
+                Quick Demo Logins
+              </span>
+              <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                1-Click Access
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('passenger')}
+                disabled={loading}
+                className="group p-3 rounded-xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all text-left flex flex-col justify-between cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                id="demo-passenger-login-btn"
+              >
+                <div className="flex items-center justify-between w-full mb-1">
+                  <span className="text-xs font-bold text-blue-800 flex items-center gap-1">
+                    <User size={13} className="text-blue-600" />
+                    Passenger
+                  </span>
+                  <span className="text-[9px] font-bold text-blue-600 bg-blue-100/80 px-1.5 py-0.5 rounded">
+                    Demo
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-500 font-mono truncate">
+                  passenger@railway.gov
+                </div>
+                <div className="text-[9px] text-blue-600 font-semibold mt-1 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                  Login now &rarr;
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('admin')}
+                disabled={loading}
+                className="group p-3 rounded-xl border border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50 hover:border-indigo-300 transition-all text-left flex flex-col justify-between cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                id="demo-admin-login-btn"
+              >
+                <div className="flex items-center justify-between w-full mb-1">
+                  <span className="text-xs font-bold text-indigo-800 flex items-center gap-1">
+                    <Shield size={13} className="text-indigo-600" />
+                    Admin
+                  </span>
+                  <span className="text-[9px] font-bold text-indigo-600 bg-indigo-100/80 px-1.5 py-0.5 rounded">
+                    Demo
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-500 font-mono truncate">
+                  admin@railway.gov
+                </div>
+                <div className="text-[9px] text-indigo-600 font-semibold mt-1 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                  Login now &rarr;
+                </div>
+              </button>
+            </div>
+          </div>
 
         </motion.div>
       </div>

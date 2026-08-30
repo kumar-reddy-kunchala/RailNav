@@ -29,7 +29,9 @@ import {
   Info,
   Play,
   Pause,
-  HelpCircle
+  HelpCircle,
+  Upload,
+  Map as MapIcon
 } from 'lucide-react';
 import {
   BarChart,
@@ -433,6 +435,17 @@ export default function App() {
   const [newFacNodeId, setNewFacNodeId] = useState('node_entrance');
   const [adminStatusMsg, setAdminStatusMsg] = useState('');
 
+  // Station edges & dynamic map states
+  const [edges, setEdges] = useState([]);
+  const [newEdgeFromNode, setNewEdgeFromNode] = useState('');
+  const [newEdgeToNode, setNewEdgeToNode] = useState('');
+  const [newEdgeDistance, setNewEdgeDistance] = useState('');
+  const [editingEdgeId, setEditingEdgeId] = useState(null);
+  const [editingEdgeDistance, setEditingEdgeDistance] = useState('');
+  const [mapUploadStationId, setMapUploadStationId] = useState('');
+  const [mapUploadFile, setMapUploadFile] = useState(null);
+  const [mapUploadStatus, setMapUploadStatus] = useState('');
+
   // Initialize Auth & Data on Load
   useEffect(() => {
     const savedToken = localStorage.getItem('railway_token');
@@ -454,6 +467,7 @@ export default function App() {
     if (selectedStationId) {
       fetchFacilities(selectedStationId);
       fetchNodes(selectedStationId);
+      fetchEdges(selectedStationId);
       fetchLiveTrainStatus(selectedStationId);
       fetchLiveCrowdStatus(selectedStationId);
       setRouteResult(null);
@@ -617,6 +631,19 @@ export default function App() {
       setIsOfflineMode(true);
       const filtered = STATIC_DATABASE.nodes.filter(n => n.stationId === stationId);
       setNodes(filtered.length ? filtered : STATIC_DATABASE.nodes.filter(n => n.stationId === 'central'));
+    }
+  };
+
+  const fetchEdges = async (stationId) => {
+    try {
+      const response = await fetch(`/api/navigation/edges/${stationId}`);
+      const text = await response.text();
+      const data = JSON.parse(text);
+      setEdges(data);
+    } catch (e) {
+      console.warn('Using static edges database fallback');
+      const filtered = STATIC_DATABASE.edges.filter(e => e.stationId === stationId);
+      setEdges(filtered.length ? filtered : STATIC_DATABASE.edges.filter(e => e.stationId === 'central'));
     }
   };
 
@@ -1063,6 +1090,105 @@ export default function App() {
         fetchFacilities(selectedStationId);
       }
     } catch (e) {}
+  };
+
+  const handleUploadStationMap = async (e) => {
+    e.preventDefault();
+    if (user?.role !== 'admin' || !token) return;
+    if (!mapUploadFile || !mapUploadStationId) {
+      setMapUploadStatus('❌ File and Station ID are required');
+      return;
+    }
+
+    setMapUploadStatus('Uploading...');
+    const formData = new FormData();
+    formData.append('map_file', mapUploadFile);
+    formData.append('stationId', mapUploadStationId);
+
+    try {
+      const response = await fetch('/api/stations/upload_map', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const d = await response.json();
+      if (response.ok) {
+        setMapUploadStatus('✅ Map uploaded successfully!');
+        setMapUploadFile(null);
+        // refresh stations
+        fetchStations();
+        setTimeout(() => setMapUploadStatus(''), 3000);
+      } else {
+        setMapUploadStatus(`❌ Error: ${d.error}`);
+      }
+    } catch (err) {
+      setMapUploadStatus('❌ Connection error');
+    }
+  };
+
+  const handleCreateOrUpdateEdge = async (e) => {
+    e.preventDefault();
+    if (user?.role !== 'admin' || !token) return;
+    if (!newEdgeFromNode || !newEdgeToNode || !newEdgeDistance) {
+      setAdminStatusMsg('❌ Origin, Target, and Distance are required');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/navigation/edges', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          stationId: selectedStationId,
+          fromNode: newEdgeFromNode,
+          toNode: newEdgeToNode,
+          distance: parseInt(newEdgeDistance)
+        })
+      });
+
+      const d = await response.json();
+      if (response.ok) {
+        setAdminStatusMsg(`✅ Edge distance configured!`);
+        setNewEdgeDistance('');
+        fetchEdges(selectedStationId);
+        setTimeout(() => setAdminStatusMsg(''), 3000);
+      } else {
+        setAdminStatusMsg(`❌ Error: ${d.error}`);
+      }
+    } catch (err) {
+      setAdminStatusMsg('❌ Connection error');
+    }
+  };
+
+  const handleDeleteEdge = async (edgeId) => {
+    if (user?.role !== 'admin' || !token) return;
+    if (!confirm('Are you sure you want to delete this navigation route/edge?')) return;
+
+    try {
+      const response = await fetch(`/api/navigation/edges/${edgeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setAdminStatusMsg('✅ Edge deleted successfully');
+        fetchEdges(selectedStationId);
+        setTimeout(() => setAdminStatusMsg(''), 3000);
+      } else {
+        const d = await response.json();
+        setAdminStatusMsg(`❌ Error: ${d.error}`);
+      }
+    } catch (err) {
+      setAdminStatusMsg('❌ Connection error');
+    }
   };
 
   // Filter facilities based on search box (from header query)
@@ -2117,6 +2243,198 @@ export default function App() {
                   </form>
                 </div>
               )}
+
+              {/* ADMIN PANEL - Upload Station Map */}
+              {user?.role === 'admin' && (
+                <div
+                  className={`border rounded-xl p-5 space-y-4 max-w-xl shadow-lg text-xs ${
+                    accessibilityMode
+                      ? 'bg-black border-yellow-400'
+                      : lightMode
+                        ? 'bg-white border-slate-200 text-slate-800'
+                        : 'bg-[#0b1329] border-[#1a2c54]'
+                  }`}
+                  id="admin-upload-station-map"
+                >
+                  <h3 className="text-sm font-bold uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-500/10 pb-2 text-blue-500">
+                    <Upload size={16} />
+                    <span>Admin Controls - Upload Station Map Blueprint</span>
+                  </h3>
+
+                  {mapUploadStatus && (
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-2.5 text-xs text-center text-blue-400">
+                      {mapUploadStatus}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleUploadStationMap} className="space-y-4 text-xs">
+                    <div className="space-y-1">
+                      <label className="font-semibold block text-slate-400">Select Target Station</label>
+                      <select
+                        required
+                        value={mapUploadStationId}
+                        onChange={(e) => setMapUploadStationId(e.target.value)}
+                        className={`w-full border rounded px-3 py-2 focus:outline-none ${
+                          lightMode ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#111e3f] text-white border-[#1a2c54]'
+                        }`}
+                      >
+                        <option value="">-- Choose a Station --</option>
+                        {stations.map(st => (
+                          <option key={st.id} value={st.id}>{st.name} ({st.code})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold block text-slate-400">Upload Map File (SVG/PNG/JPG)</label>
+                      <input
+                        type="file"
+                        required
+                        accept="image/*"
+                        onChange={(e) => setMapUploadFile(e.target.files[0])}
+                        className={`w-full border rounded px-3 py-2 focus:outline-none ${
+                          lightMode ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#111e3f] text-white border-[#1a2c54]'
+                        }`}
+                      />
+                      <p className="text-[10px] text-slate-500 italic mt-1">
+                        * Uploading an SVG or PNG will override the default blueprint map graphic for this station immediately in the navigation console.
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded shadow-md mt-2 transition-all cursor-pointer"
+                    >
+                      Upload Station Blueprint
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* ADMIN PANEL - Distance & Edge Node Management */}
+              {user?.role === 'admin' && (
+                <div
+                  className={`border rounded-xl p-5 space-y-4 max-w-xl shadow-lg text-xs ${
+                    accessibilityMode
+                      ? 'bg-black border-yellow-400'
+                      : lightMode
+                        ? 'bg-white border-slate-200 text-slate-800'
+                        : 'bg-[#0b1329] border-[#1a2c54]'
+                  }`}
+                  id="admin-manage-edges"
+                >
+                  <h3 className="text-sm font-bold uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-500/10 pb-2 text-blue-500">
+                    <MapIcon size={16} />
+                    <span>Admin Controls - Node Distance Configuration ({activeStation.name})</span>
+                  </h3>
+
+                  <form onSubmit={handleCreateOrUpdateEdge} className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs items-end">
+                    <div className="space-y-1">
+                      <label className="font-semibold block text-slate-400">From Node</label>
+                      <select
+                        required
+                        value={newEdgeFromNode}
+                        onChange={(e) => setNewEdgeFromNode(e.target.value)}
+                        className={`w-full border rounded px-2.5 py-2 focus:outline-none ${
+                          lightMode ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#111e3f] text-white border-[#1a2c54]'
+                        }`}
+                      >
+                        <option value="">-- Origin Node --</option>
+                        {nodes.map(n => (
+                          <option key={n.id} value={n.id}>{n.name} ({n.id})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold block text-slate-400">To Node</label>
+                      <select
+                        required
+                        value={newEdgeToNode}
+                        onChange={(e) => setNewEdgeToNode(e.target.value)}
+                        className={`w-full border rounded px-2.5 py-2 focus:outline-none ${
+                          lightMode ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#111e3f] text-white border-[#1a2c54]'
+                        }`}
+                      >
+                        <option value="">-- Target Node --</option>
+                        {nodes.map(n => (
+                          <option key={n.id} value={n.id}>{n.name} ({n.id})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold block text-slate-400">Distance (meters)</label>
+                      <div className="flex space-x-2">
+                        <input
+                          type="number"
+                          required
+                          min={1}
+                          value={newEdgeDistance}
+                          onChange={(e) => setNewEdgeDistance(e.target.value)}
+                          placeholder="e.g. 15"
+                          className={`w-full border rounded px-2.5 py-2 focus:outline-none ${
+                            lightMode ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#111e3f] text-white border-[#1a2c54]'
+                          }`}
+                        />
+                        <button
+                          type="submit"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded shadow transition-all cursor-pointer shrink-0"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+
+                  {/* Configured Edges List */}
+                  <div className="space-y-2 mt-4 pt-2 border-t border-slate-500/10">
+                    <h4 className="font-bold text-[11px] text-slate-400 uppercase tracking-wider">Active Navigation Paths & Distances</h4>
+                    
+                    <div className="max-h-[220px] overflow-y-auto space-y-1.5 pr-1">
+                      {edges && edges.length > 0 ? (
+                        edges.map(ed => {
+                          const fromNodeObj = nodes.find(n => n.id === ed.fromNode);
+                          const toNodeObj = nodes.find(n => n.id === ed.toNode);
+                          return (
+                            <div
+                              key={ed.id}
+                              className={`flex items-center justify-between p-2.5 rounded-lg border text-xs ${
+                                lightMode
+                                  ? 'bg-slate-50 border-slate-200 text-slate-700'
+                                  : 'bg-[#101b3a] border-[#1e2d52]/40 text-slate-300'
+                              }`}
+                            >
+                              <div className="flex flex-col truncate pr-2">
+                                <span className="font-medium truncate">
+                                  {fromNodeObj ? fromNodeObj.name : ed.fromNode} 
+                                  <span className="text-blue-500 mx-1.5">➔</span> 
+                                  {toNodeObj ? toNodeObj.name : ed.toNode}
+                                </span>
+                                <span className="text-[10px] text-slate-500 font-mono">ID: {ed.id}</span>
+                              </div>
+                              <div className="flex items-center space-x-3 shrink-0">
+                                <span className="font-mono bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                  {ed.distance} meters
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteEdge(ed.id)}
+                                  className="text-rose-400 hover:text-rose-300 font-bold hover:underline"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-[10px] text-slate-500 italic py-2">No custom paths configured for this station yet. Defaults are active.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -2415,6 +2733,7 @@ export default function App() {
                     accessibilityMode={accessibilityMode}
                     currentStepIndex={currentStepIndex}
                     lightMode={lightMode}
+                    activeStation={activeStation}
                   />
                 </div>
 
